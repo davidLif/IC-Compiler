@@ -8,6 +8,7 @@ public class Commands {
 		private Variable leftVar;
 		private Variable rightVar;
 		private Operation booleanOp;
+		private ICommand commandToTake;
 
 		@Override
 		public void execute() {
