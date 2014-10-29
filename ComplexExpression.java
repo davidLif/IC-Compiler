@@ -1,11 +1,11 @@
 
 public class ComplexExpression implements IExpression{
 
-	private char binaryOp; 
+	private Operation binaryOp; 
 	private IExpression firstExp;
 	private IExpression secExp;
 	
-	public ComplexExpression(char binaryOp)
+	public ComplexExpression(Operation binaryOp)
 	{
 		this.binaryOp = binaryOp;
 	}

@@ -20,14 +20,20 @@ public class Variable implements IExpression {
 	{
 	
 		// return variable value
-		// MAY RETURN NULL
+		
+		if (!varToVal.containsKey(this.variable))
+		{
+		    // not initialized
+			return null;
+		}
+		
 		return varToVal.get(this.variable);
 	}
 	
 	// update variable value
-	public static void setVal(String var, int value)
+	public static void setVal(Variable var, int value)
 	{
-		varToVal.put(var, value);
+		varToVal.put(var.variable, value);
 	}
 	
 	

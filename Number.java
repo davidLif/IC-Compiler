@@ -1,9 +1,10 @@
 
-
+/* number expression class */
 public class Number implements IExpression{
 
-	private int value;
+	/* simply stores the value of the number, and evaluates it as an expression */
 	
+	private int value;
 	public Number(int value)
 	{
 		this.value = value;
@@ -15,10 +16,5 @@ public class Number implements IExpression{
 		return this.value;
 	}
 	
-	
-	public int getValue()
-	{
-		return this.value;
-	}
 	
 }
