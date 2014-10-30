@@ -24,6 +24,11 @@ public class Token {
 	{
 		return this.tokenType;
 	}
+	//this function makes a Variable object according to the token;
+	public Variable tokenToVar(){
+		//TODO
+		return null;
+	}
 		
 	
 

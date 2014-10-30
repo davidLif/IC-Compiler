@@ -10,6 +10,13 @@ public class Commands {
 		private Operation booleanOp;
 		private ICommand commandToTake;
 
+		public ifCommand(Variable leftVar,Variable rightVar,Operation booleanOp,ICommand commandToTake){
+			this.leftVar=leftVar;
+			this.rightVar=rightVar;
+			this.booleanOp=booleanOp;
+			this.commandToTake=commandToTake;
+		}
+
 		@Override
 		public void execute() {
 			// TODO Auto-generated method stub

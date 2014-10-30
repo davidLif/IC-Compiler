@@ -18,4 +18,9 @@ public class TokenGenerator {
 	{
 		return TokenGenerator.currentToken;
 	}
+	
+	public static Token getAndAdvance(){
+		advanceToNextToken();
+		return getToken();
+	}
 }
