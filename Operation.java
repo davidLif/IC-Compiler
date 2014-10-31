@@ -56,8 +56,9 @@ public enum Operation {
 			return x*y;
 		case DIV:
 			return x/y;
-		default:
-			return 0;
+		default: /* denis - returning 0 is wrong. it can be the real output. we might need to add execptions*/
+			System.out.println("Error evaluating the op");
+			return -1; /* change that!*/
 			
 		}
 	}
@@ -83,7 +84,7 @@ public enum Operation {
 		case NOTEQ:
 			return x != y;
 		default:
-			return false;
+			return false; /* denis - we might ned to add expection - false is a legitimc result */
 			
 		}
 	}

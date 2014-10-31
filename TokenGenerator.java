@@ -114,8 +114,9 @@ public class TokenGenerator {
 					 *  including variables
 					 */
 					if(c == ' ' || c == '\n' || c == ';' || c == '0' || c == '+' || c == '-' || c == '*' || c == '\\'
-							|| c == '(' || c == ')' || Character.isAlphabetic(c))
+							|| c == '(' || c == ')' ||  Character.isAlphabetic(c))
 					{
+				
 						TokenGenerator.updateTokenByRep(Character.toString(c));
 						return false;
 					}

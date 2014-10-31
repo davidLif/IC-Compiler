@@ -1,3 +1,5 @@
+import java.util.function.BinaryOperator;
+
 
 public class ComplexExpression implements IExpression{
 
@@ -20,11 +22,14 @@ public class ComplexExpression implements IExpression{
 	}
 	
 	@Override
-	public Integer evaluate() {
-		// TODO Auto-generated method stub
-		// calc value and return
-		return null;
+	public Integer evaluate() 
+	{
+		
+		return  Operation.computeBinaryOperation(binaryOp, firstExp.evaluate() ,secExp.evaluate());
 	}
+	
+	
+
 	
 	@Override
 	public String toString()

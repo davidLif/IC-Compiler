@@ -9,6 +9,7 @@ public class Token {
 	/* representation, could be a variable, number, operation
 	 * stored as a string
 	 */
+	/* please specify the possibilities of the rep*/
 	private String rep; 
 	
 	/* 

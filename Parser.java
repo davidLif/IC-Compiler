@@ -10,8 +10,8 @@ public class Parser {
 	// Method parses the given program and returns a list of statements.
 	public static List<Statement> parseProgram()
 	{
-		List<Statement> statementList=new ArrayList<Statement>();//This is the statement list- a representation of the program.
-		int currLabel = -1; //Variable to maintain last seen label, to ensure monotone growth.
+		List<Statement> statementList=new ArrayList<Statement>();  //The statement list- a representation of the program.
+		int currLabel = -1; //last seen label  (monotone growth checking)
 		int lineCounter = 0;   // variable to count lines
 		Token curTokenParsing = TokenGenerator.currentToken; // fetch token reference from lexer
 		for ( TokenGenerator.advanceToNextToken() ; curTokenParsing.getTokenType()!=TokenType.EOF; TokenGenerator.advanceToNextToken(), ++lineCounter){

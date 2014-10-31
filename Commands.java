@@ -11,9 +11,11 @@ public class Commands {
 		private ICommand commandToTake;
 
 		@Override
-		public void execute() {
-			// TODO Auto-generated method stub
-			
+		public void execute() {	
+			if(Operation.computeBooleanOperation(booleanOp, leftVar.evaluate(), rightVar.evaluate()))
+			{
+				commandToTake.execute();
+			}
 		}
 		
 		public ifCommand(Variable leftVar,Variable rightVar,Operation booleanOp,ICommand commandToTake){
@@ -43,7 +45,7 @@ public class Commands {
 		@Override
 		public void execute() {
 			// TODO Auto-generated method stub
-			// note: use Processor.gotoLabel to jump to a different label
+			Processor.gotoLabel(labelNumber.evaluate());
 		}
 		
 		@Override
@@ -58,7 +60,8 @@ public class Commands {
 
 		@Override
 		public void execute() {
-			// TODO Auto-generated method stub
+			Main.Print(exp.evaluate());
+			return;
 			
 		}
 		
@@ -79,10 +82,10 @@ public class Commands {
 		private IExpression exp;
 
 		@Override
-		public void execute() {
-			// TODO Auto-generated method stub
+		public void execute() 
+		{
 			
-			// note: use Variable.setVal method
+			Variable.setVal(var, exp.evaluate());
 		}
 		
 		public assignCommand(Variable var,IExpression exp){
