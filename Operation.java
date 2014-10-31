@@ -14,7 +14,7 @@
  */
 public enum Operation {
 
-	MUL, ADD, SUB, DIV, LESSTHAN, BIGGERTHAN, LESSEQ, BIGEQ, EQ, NOTEQ
+	MUL, ADD, SUB, DIV, LESSTHAN, BIGGERTHAN, LESSEQ, BIGEQ, EQ, NOTEQ;
 	
 /*	public Operation setOp(String rep){
 		switch(rep){

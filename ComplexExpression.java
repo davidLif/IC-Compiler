@@ -2,8 +2,8 @@
 public class ComplexExpression implements IExpression{
 
 	private Operation binaryOp; 
-	private IExpression firstExp;
-	private IExpression secExp;
+	public IExpression firstExp;
+	public IExpression secExp;
 	
 	public ComplexExpression(Operation binaryOp)
 	{

@@ -1,3 +1,5 @@
+import java.util.List;
+
 /**
  * 
  */
@@ -15,8 +17,7 @@ public class Main {
 		
 		// init token generator, give file name
 		TokenGenerator.initTokenGenerator(args[0]);
-		
-				if(TokenGenerator.advanceToNextToken())
+		/*if(TokenGenerator.advanceToNextToken())
 				{
 					// err
 					System.out.println("invalid token\n");
@@ -24,18 +25,20 @@ public class Main {
 				}
 				
 			while(TokenGenerator.getToken().getTokenType() != TokenType.EOF){
-				
 				System.out.print(" [ " + TokenGenerator.getToken().getTokenType().toString()
 						+ " " + TokenGenerator.getToken().getRep() + " ] ");
-				if(TokenGenerator.advanceToNextToken())
-				{
+			if(TokenGenerator.advanceToNextToken()){
 					// err
 					System.out.println("invalid token\n");
 					return;
 				}
 			}
 			System.out.print(" [ " + TokenGenerator.getToken().getTokenType().toString()
-					+ " " + TokenGenerator.getToken().getRep() + " ] ");
+				+ " " + TokenGenerator.getToken().getRep() + " ] ");*/
+		List<Statement> program=Parser.parseProgram();
+		if(program==null){
+			System.out.println("Uston, we have a problem");
+		}
 	}
 	
 

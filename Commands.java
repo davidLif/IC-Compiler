@@ -10,12 +10,6 @@ public class Commands {
 		private Operation booleanOp;
 		private ICommand commandToTake;
 
-		@Override
-		public void execute() {
-			// TODO Auto-generated method stub
-			
-		}
-		
 		public ifCommand(Variable leftVar,Variable rightVar,Operation booleanOp,ICommand commandToTake){
 			this.leftVar=leftVar;
 			this.rightVar=rightVar;
@@ -23,11 +17,22 @@ public class Commands {
 			this.commandToTake=commandToTake;
 		}
 		
+		@Override
+		public void execute() {
+			// TODO Auto-generated method stub
+			
+		}
+		
+		// add constructor
 	}
 	
 	public static class gotoCommand implements ICommand
 	{
 		private Number labelNumber;
+
+		public gotoCommand(Number label) {
+			labelNumber=label;
+		}
 
 		@Override
 		public void execute() {
@@ -41,13 +46,15 @@ public class Commands {
 	{
 		private IExpression exp;
 
+		public printCommand(IExpression ecpToPrint){
+			exp=ecpToPrint;
+		}
+
 		@Override
 		public void execute() {
 			// TODO Auto-generated method stub
 			
 		}
-		
-		
 		
 		// add constructor
 		
@@ -56,6 +63,11 @@ public class Commands {
 	{
 		private Variable var;
 		private IExpression exp;
+
+		public assignCommand(Variable var,IExpression exp){
+			this.var=var;
+			this.exp=exp;
+		}
 
 		@Override
 		public void execute() {

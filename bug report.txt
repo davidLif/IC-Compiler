@@ -1,0 +1,8 @@
+bug report:
+
+5: x := 4; AND 5: goto 4;
+when doing next Token after 4 I get 4 again
+
+5: print 5; AND 5: if (x==y) x:= 5; AND 5:if (x==y) x:= 5;
+when doing next Token after : I get : again
+
