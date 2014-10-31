@@ -1,22 +1,82 @@
-import java.io.BufferedReader;
+
 import java.io.FileInputStream;
 import java.io.FileNotFoundException;
 import java.io.IOException;
-import java.io.InputStream;
-import java.io.InputStreamReader;
+
+
 import java.io.PushbackInputStream;
-import java.io.Reader;
-import java.util.Scanner;
+
+
 
 
 
 
 public class TokenGenerator {
 
-	private static Token currentToken;
+	public static Token currentToken;
 	private static PushbackInputStream buffer;
 	
 	
+	
+	/* 
+	 * method sets current token according to given string representation 
+	 */
+	private static void updateTokenByRep(String rep)
+	{
+		currentToken.update(TokenType.getTypeByString(rep), rep);
+    }
+	
+	
+	/* 
+	 * method checks whether the buffer contains the given keyword
+	 * (in the beginning of the stream )
+	 * if so, returns true, otherwise, returns false
+	 * (note, if the answer is no, the stream is restored to previous condition
+	 *        if the answer is yes, the stream will no longer contain the keyword)
+	 */
+	private static boolean isKeywordToken(String keyword) throws IOException
+	{
+		
+
+		int nextChar;
+		char c;
+		
+		for(int i = 0; i < keyword.length(); ++i)
+		{
+			nextChar = buffer.read();
+			if(nextChar == -1) {
+				// invalid EOF, push string back
+				for(int j = i-1; j >= 0; ++j)
+					buffer.unread(keyword.charAt(j));
+				return false;
+			}
+			
+			c = (char)nextChar;
+			
+			if (c != keyword.charAt(i))
+			{
+				// doesn't fit the string
+				// push the string back on buffer
+				for(int j = i; j >= 0; --j)
+				{
+					buffer.unread(keyword.charAt(j));
+				}
+				return false;
+			}
+		}
+		
+		// string was indeed on the top of the buffer
+		return true;
+	}
+	
+	
+	
+	
+	
+	/* keywords in our program language */
+	private static final String gotoStr = "goto";
+	private static final String printStr = "print";
+	private static final String ifStr = "if";
 	
 	/* 
 	 * method to advance to the next token (updates currentToken)
@@ -33,148 +93,36 @@ public class TokenGenerator {
 				{
 					char c = (char)nextChar;
 					
-					// skip spaces
-					if(c == ' ')
-						continue;
-					if(Character.isWhitespace(c))
+					// search for keywords
+					String[] keywords = {gotoStr, printStr, ifStr };
+					for(int i = 0; i < keywords.length; ++i)
 					{
-						// invalid white space
-						return true;
-					}
-					if(c == 'i')
-					{
-						
-						// possible if or variable
-						nextChar = buffer.read();
-						if(nextChar == -1)
+						if(c == keywords[i].charAt(0))
 						{
-							// invalid termination of the program
-							return true;
-						}
-						c = (char)nextChar;
-						if(c == 'f')
-						{
-							// possible if
-							nextChar = buffer.read();
-							if(nextChar == -1)
+							// check if rest of keyword is on the buffer
+							if(isKeywordToken(keywords[i].substring(1)))
 							{
-								// invalid termination of the program
-								return true;
-							}
-							c = (char)nextChar;
-							if(c != '(')
-							{
-								// invalid if structure
-								return true;
-							}
-							else
-							{
-								// valid if token
-								currentToken.update(TokenType.IF, "if"); 
-								buffer.unread('(');
-								return false;
-								
-							}
-							
-						}
-						else if(c == ' ')
-						{
-							// i variable
-							currentToken.update(TokenType.VAR, "i");
-							return false;
-						}
-						else
-						{
-							// invalid token
-							return true;
-						}
-					}
-					else if(c == 'g')
-					{
-						// possible goto
-						String gotoString = "oto ";
-						for(int i = 0; i < gotoString.length(); ++i)
-						{
-							nextChar = buffer.read();
-							if(nextChar == -1) // invalid EOF
-								return true;
-							c = (char)nextChar;
-							if(i == 0 && c == ' ')
-							{
-								// g variable
-								currentToken.update(TokenType.VAR, "g");
+								// it was on buffer (now popped out)
+								TokenGenerator.updateTokenByRep(keywords[i]);
 								return false;
 							}
-							else if (c != gotoString.charAt(i))
-							{
-								// doesn't fit goto string
-								return true;
-							}
 						}
-						// at this point, we determined that it was a goto token
-						currentToken.update(TokenType.GOTO, "goto");
+					}
+					
+					/* 
+					 *  take care of single character tokens (that are not prefixes to valid tokens)
+					 *  including variables
+					 */
+					if(c == ' ' || c == '\n' || c == ';' || c == '0' || c == '+' || c == '-' || c == '*' || c == '\\'
+							|| c == '(' || c == ')' || Character.isAlphabetic(c))
+					{
+						TokenGenerator.updateTokenByRep(Character.toString(c));
 						return false;
 					}
-					else if (c == 'p')
-					{
-						// possible print
-						String printString = "rint(";
-						for(int i = 0; i < printString.length(); ++i)
-						{
-							nextChar = buffer.read();
-							if(nextChar == -1) // invalid EOF
-								return true;
-							c = (char)nextChar;
-							if(i == 0 && c == ' ')
-							{
-								// p variable
-								currentToken.update(TokenType.VAR, "p");
-								return false;
-							}
-							else if (c != printString.charAt(i))
-							{
-								// doesn't fit print string
-								return true;
-							}
-						}
-						// at this point, we determined that it was a print token
-						
-						currentToken.update(TokenType.PRINT, "print");
-						buffer.unread('(');
-						return false;
-						
-					}
-					else if( 'a' <= c && c <= 'z')
-					{
-						// possible variable
-						String possibleVar = Character.toString(c);
-						nextChar = buffer.read();
-						if(nextChar == -1) // invalid EOF
-							return true;
-						c = (char)nextChar;
-						if(c == ' ' || c == ')' || c == ';')
-						{
-							currentToken.update(TokenType.VAR, possibleVar);
-							
-							buffer.unread(c);
-							
-							return false;
-							
-						}
-						else
-						{
-							// invalid token, starts with a letter, but is not
-							// any of the above commands, and not a valid variable
-							return true;
-						}
-						
-					}
-					else if (c == '0')
-					{
-						currentToken.update(TokenType.NUM, "0");
-						return false;
-					}
-					else if ( Character.isDigit(c))
+					
+					/* take care of numbers (zero was checked before) */
+
+					if ( Character.isDigit(c))
 					{
 						// digit or number
 						StringBuilder number = new StringBuilder(Character.toString(c));
@@ -190,7 +138,8 @@ public class TokenGenerator {
 							{
 								// push back the character
 								buffer.unread(c);
-								currentToken.update(TokenType.NUM, number.toString());
+								// update token
+								TokenGenerator.updateTokenByRep(number.toString());
 								return false;
 								
 							}
@@ -199,7 +148,10 @@ public class TokenGenerator {
 						// reached here -> invalid EOF
 						return true;
 					}
-					else if ( c == ':')
+					
+					/* take care of  : or := */
+					
+					if ( c == ':')
 					{
 						// possible : or :=
 						nextChar = buffer.read();
@@ -209,36 +161,21 @@ public class TokenGenerator {
 						if(c == '=')
 						{
 							// assignment
-							currentToken.update(TokenType.ASSIGN, ":=");
+							updateTokenByRep(":=");
 							return false;
 						}
 						else
 						{
+							// colon
 							buffer.unread(c);
-							currentToken.update(TokenType.COLON, ":");
+							updateTokenByRep(":");
 							return false;
 						}
 					}
-					else if( c == ';')
-					{
-						// possible ;\n
-						nextChar = buffer.read();
-						if(nextChar == -1) // invalid EOF
-							return true;
-						c = (char)nextChar;
-						if(c == '\n'){
-							currentToken.update(TokenType.ENDLINE, ";\n");
-							return false;
-						}
-						// ;something, invalid
-						return true;
-					}
-					else if( c == '+' || c == '*' || c == '-' || c == '\\')
-					{
-						currentToken.update(TokenType.BINOP, Character.toString(c));
-						return false;
-					}
-					else if (c == '=' || c == '!')
+					
+					
+					/* take care of == and != */
+					if (c == '=' || c == '!')
 					{
 						// possible == or !=
 						nextChar = buffer.read();
@@ -247,19 +184,22 @@ public class TokenGenerator {
 						char nextC = (char)nextChar;
 						if(c == '=' && nextC == '=')
 						{
-							currentToken.update(TokenType.BOOLOP, "==");
+							updateTokenByRep("==");
 							return false;
 						}
 						else if (c == '!' && nextC == '=')
 						{
-							currentToken.update(TokenType.BOOLOP, "!=");
+							updateTokenByRep("!=");
 							return false;
 						}
+						
 						// otherwise, invalid token
 						return true;
 						
 					}
-					else if(c == '<' || c == '>')
+					
+					/* take care of <, >, <=, >= */
+					if(c == '<' || c == '>')
 					{
 						// possible <, >, <=, >=
 						nextChar = buffer.read();
@@ -269,30 +209,18 @@ public class TokenGenerator {
 						if(nextC == '=')
 						{
 							// <= or >=
-							currentToken.update(TokenType.BOOLOP, 
-									Character.toString(c) + "=");
+							updateTokenByRep(Character.toString(c) + "=");
 							return false;
 						}
 						else
 						{
 							// < or >
 							buffer.unread(nextC);
-							currentToken.update(TokenType.BOOLOP, 
-									Character.toString(c));
+							updateTokenByRep(Character.toString(c));
 							return false;
 						}
 					}
-					else if(c == '(')
-					{
-						currentToken.update(TokenType.LPAR, "(");
-						return false;
-					}
-					else if(c == ')')
-					{
-						currentToken.update(TokenType.RPAR, ")");
-						return false;
-						
-					}
+					
 					else
 					{
 						// read something else ?
@@ -319,12 +247,7 @@ public class TokenGenerator {
 		
 	}
 	
-	/* method to retrieve the next token
-	 * (use this method to get current token) */ 
-	public static Token getToken()
-	{
-		return TokenGenerator.currentToken;
-	}
+
 	
 	/* method initiates TokenGenerator by giving the input file name
 	 * method opens the file for reading */
@@ -338,6 +261,8 @@ public class TokenGenerator {
 			System.out.println("Error: could not open file\n");
 			e.printStackTrace();
 		}
+		
+		
 	}
 	
 	/* method closes open file resources */
@@ -352,9 +277,5 @@ public class TokenGenerator {
 		}
 	}
 	
-	/* remove this method */
-	public static Token getAndAdvance(){
-		advanceToNextToken();
-		return getToken();
-	}
+	
 }

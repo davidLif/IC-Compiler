@@ -16,31 +16,28 @@ public enum Operation {
 
 	MUL, ADD, SUB, DIV, LESSTHAN, BIGGERTHAN, LESSEQ, BIGEQ, EQ, NOTEQ;
 	
-/*	public Operation setOp(String rep){
-		switch(rep){
-		case "*":
+	public static Operation getOpByString(String rep){
+		if(rep.equals("*"))
 			return MUL;
-		case "+":
+		if(rep.equals("+"))
 			return ADD;
-		case "-":
+		if(rep.equals("-"))
 			return SUB;
-		case "\\": //this is a great danger! must be careful;
+		if(rep.equals("\\"))
 			return DIV;
-		case "<":
+		if(rep.equals("<"))
 			return LESSTHAN;
-		case ">":
+		if(rep.equals(">"))
 			return BIGGERTHAN;
-		case "<=":
+		if(rep.equals("<="))
 			return LESSEQ;
-		case ">=":
+		if(rep.equals(">="))
 			return BIGEQ;
-		case "==":
+		if(rep.equals("=="))
 			return EQ;
-		case "!=":
+		if(rep.equals("!="))
 			return NOTEQ;	
-		default:
-			// Syntax error and out
-			return MUL;//TODO: maybe a null op?
-		}
-	}*/
+		return null;
+	}
 }
+
