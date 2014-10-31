@@ -16,5 +16,9 @@ public class Number implements IExpression{
 		return this.value;
 	}
 	
-	
+	@Override
+	public String toString()
+	{
+		return Integer.toString(value);
+	}
 }

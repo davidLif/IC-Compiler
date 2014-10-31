@@ -51,6 +51,12 @@ public class Variable implements IExpression {
 		var.value = value;
 	}
 	
+	@Override
+	public String toString()
+	{
+		return this.rep;
+	}
+	
 	
 	
 	

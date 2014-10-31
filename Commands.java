@@ -23,6 +23,13 @@ public class Commands {
 			this.commandToTake=commandToTake;
 		}
 		
+		@Override
+		public String toString()
+		{
+			return String.format("if (%s %s %s) then %s", leftVar.toString(), booleanOp.toString(), 
+					rightVar.toString(), commandToTake.toString());
+		}
+		
 	}
 	
 	public static class gotoCommand implements ICommand
@@ -39,7 +46,11 @@ public class Commands {
 			// note: use Processor.gotoLabel to jump to a different label
 		}
 		
-		// add constructor
+		@Override
+		public String toString()
+		{
+			return String.format("goto %s", labelNumber.toString());
+		}
 	}
 	public static class printCommand implements ICommand
 	{
@@ -53,6 +64,12 @@ public class Commands {
 		
 		public printCommand(IExpression expToPrint){
 			exp=expToPrint;
+		}
+		
+		@Override
+		public String toString()
+		{
+			return String.format("print(%s)", exp.toString());
 		}
 		
 	}
@@ -71,6 +88,12 @@ public class Commands {
 		public assignCommand(Variable var,IExpression exp){
 			this.var=var;
 			this.exp=exp;
+		}
+		
+		@Override
+		public String toString()
+		{
+			return String.format("%s = %s", var.toString(), exp.toString());
 		}
 		
 	}

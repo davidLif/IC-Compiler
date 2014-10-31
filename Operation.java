@@ -39,5 +39,56 @@ public enum Operation {
 			return NOTEQ;	
 		return null;
 	}
+	
+	/* method computes binary operation op on two given inputs, x and y [ *, +, -, \ ]
+	 * if a boolean operation is given by mistake, method returns 0
+	 */
+	public static int computeBinaryOperation(Operation op, int x, int y)
+	{
+		
+		switch(op)
+		{
+		case ADD:
+			return x+y;
+		case SUB:
+			return x-y;
+		case MUL:
+			return x*y;
+		case DIV:
+			return x/y;
+		default:
+			return 0;
+			
+		}
+	}
+	
+	/* method computes boolean operation op on two given inputs, x and y [ <, >, <=, >=, ==, != ]
+	 * if a binary operation is given by mistake, method returns false
+	 */
+	public static boolean computeBooleanOperation(Operation op, int x, int y)
+	{
+		
+		switch(op)
+		{
+		case LESSTHAN:
+			return x < y;
+		case BIGGERTHAN:
+			return x > y;
+		case LESSEQ:
+			return x <= y;
+		case BIGEQ:
+			return x >= y;
+		case EQ:
+			return x == y;
+		case NOTEQ:
+			return x != y;
+		default:
+			return false;
+			
+		}
+	}
+	
+	
+	
 }
 

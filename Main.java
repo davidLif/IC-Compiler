@@ -45,6 +45,7 @@ public class Main {
 			//TokenGenerator.initTokenGenerator(args[0]);
 			List<Statement> st = Parser.parseProgram();
 			if(st == null) System.out.println("error!!");
+			System.out.println(st);
 	}
 	
 

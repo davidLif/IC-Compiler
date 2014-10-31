@@ -25,5 +25,11 @@ public class ComplexExpression implements IExpression{
 		// calc value and return
 		return null;
 	}
+	
+	@Override
+	public String toString()
+	{
+		return String.format("(%s %s %s)", firstExp.toString(), binaryOp.toString(), secExp.toString());
+	}
 
 }

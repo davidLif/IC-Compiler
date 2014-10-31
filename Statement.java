@@ -20,4 +20,9 @@ public class Statement {
 	public ICommand getCommand(){
 		return commandRoot;
 	}
+	
+	@Override
+	public String toString(){
+		return String.format("[Statement %s: %s ]\n", Integer.toString(labelNumber), commandRoot.toString() );
+	}
 }
