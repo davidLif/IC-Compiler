@@ -44,7 +44,6 @@ public class Commands {
 
 		@Override
 		public void execute() {
-			// TODO Auto-generated method stub
 			Processor.gotoLabel(labelNumber.evaluate());
 		}
 		
@@ -61,6 +60,7 @@ public class Commands {
 		@Override
 		public void execute() {
 			Main.Print(exp.evaluate());
+			Processor.increaseIndex();
 			return;
 			
 		}
@@ -84,8 +84,8 @@ public class Commands {
 		@Override
 		public void execute() 
 		{
-			
 			Variable.setVal(var, exp.evaluate());
+			Processor.increaseIndex();
 		}
 		
 		public assignCommand(Variable var,IExpression exp){
