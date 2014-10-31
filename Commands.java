@@ -10,20 +10,19 @@ public class Commands {
 		private Operation booleanOp;
 		private ICommand commandToTake;
 
-		public ifCommand(Variable leftVar,Variable rightVar,Operation booleanOp,ICommand commandToTake){
-			this.leftVar=leftVar;
-			this.rightVar=rightVar;
-			this.booleanOp=booleanOp;
-			this.commandToTake=commandToTake;
-		}
-
 		@Override
 		public void execute() {
 			// TODO Auto-generated method stub
 			
 		}
 		
-		// add constructor
+		public ifCommand(Variable leftVar,Variable rightVar,Operation booleanOp,ICommand commandToTake){
+			this.leftVar=leftVar;
+			this.rightVar=rightVar;
+			this.booleanOp=booleanOp;
+			this.commandToTake=commandToTake;
+		}
+		
 	}
 	
 	public static class gotoCommand implements ICommand
@@ -47,6 +46,8 @@ public class Commands {
 			// TODO Auto-generated method stub
 			
 		}
+		
+		
 		
 		// add constructor
 		

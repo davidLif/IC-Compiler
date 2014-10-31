@@ -7,7 +7,8 @@ public class Statement {
 	/* command root */
 	private ICommand commandRoot;
 	
-	public Statement(int labelNum,ICommand statCommand){
+	/* basic constructor */
+	public Statement(int labelNum, ICommand statCommand){
 		labelNumber=labelNum;
 		commandRoot=statCommand;
 	}
@@ -19,5 +20,4 @@ public class Statement {
 	public ICommand getCommand(){
 		return commandRoot;
 	}
-	
 }

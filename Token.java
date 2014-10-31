@@ -24,12 +24,21 @@ public class Token {
 	{
 		return this.tokenType;
 	}
-	//this function makes a Variable object according to the token;
-	public Variable tokenToVar(){
-		//TODO
-		return null;
-	}
 		
+	/* basic constructor */
+	public Token(TokenType type, String rep)
+	{
+		this.tokenType = type;
+		this.rep = rep;
+	}
+	
+	/* update token method */
+	public  void update(TokenType type, String rep)
+	{
+		this.tokenType = type;
+		this.rep = rep;
+	}
+	
 	
 
 }

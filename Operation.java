@@ -14,9 +14,9 @@
  */
 public enum Operation {
 
-	MUL, ADD, SUB, DIV, LESSTHAN, BIGGERTHAN, LESSEQ, BIGEQ, EQ, NOTEQ;
+	MUL, ADD, SUB, DIV, LESSTHAN, BIGGERTHAN, LESSEQ, BIGEQ, EQ, NOTEQ
 	
-	public Operation setOp(String rep){
+/*	public Operation setOp(String rep){
 		switch(rep){
 		case "*":
 			return MUL;
@@ -42,5 +42,5 @@ public enum Operation {
 			// Syntax error and out
 			return MUL;//TODO: maybe a null op?
 		}
-	}
+	}*/
 }
