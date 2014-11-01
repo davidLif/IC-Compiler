@@ -1,6 +1,11 @@
 import java.util.List;
 
 
+
+/**
+ * 
+ */
+
 /**
  * @author Denis
  *
@@ -16,12 +21,7 @@ public class Main {
 		TokenGenerator.initTokenGenerator(args[0]);
 	
 		List<Statement> st = Parser.parseProgram();
-		if (st==null){//Found an error in the program.
-			//Print all the error massages
-			for(int i=0;i<Parser.errorMassages.size();i++){
-				PrintError(Parser.errorLines.get(i),Parser.errorMassages.get(i));
-			}
-		}
+		//System.out.println(st);
 		Processor.Process(st);
 	}
 	
@@ -30,7 +30,7 @@ public class Main {
 		System.out.println(""+val);
 	}
 	
-	public static void PrintError(int line , String code) {
+	public static void PrintError(int line , int code) {
 		System.out.println("Error! Line:"+line+" Code:"+code);
 	}
 	

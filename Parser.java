@@ -5,45 +5,29 @@ import java.util.List;
 
 public class Parser {
 	
-	private static String curLineMistake=null;//This string holds the description off the last mistake found in the code
-	public static List<String> errorMassages=new ArrayList<String>();//This list holds all the error massages we got while parsing.
-	public static List<Integer> errorLines=new ArrayList<Integer>();//This list holds all the number of lines which were unvalid.
+	
 	
 	// Method parses the given program and returns a list of statements.
-	// If there is an error in this code, the function returns null.
 	public static List<Statement> parseProgram()
 	{
 		List<Statement> statementList=new ArrayList<Statement>();//This is the statement list- a representation of the program.
 		int currLabel = -1; //Variable to maintain last seen label, to ensure monotone growth.
-		int lineNumber=-1;
-		boolean errorInCode=false;//this variable assigned "true" if there was at least one mistake in the code.
-		boolean endedCorrctly=false;
-		String errorStart="In label:";
-		Token curTokenParsing = TokenGenerator.currentToken; // fetch token reference from lexer.
+		int lineCounter = 1;   // variable to count lines
+		Token curTokenParsing = TokenGenerator.currentToken; // fetch token reference from lexer
 		
-		//
-		for ( TokenGenerator.advanceToNextToken() ;curTokenParsing.getTokenType()!=TokenType.EOF; TokenGenerator.advanceToNextToken(),++lineNumber){
+		boolean err = false; // error flag, note that we count the lines
+		
+		for ( TokenGenerator.advanceToNextToken() ; curTokenParsing.getTokenType()!=TokenType.EOF; TokenGenerator.advanceToNextToken(), ++lineCounter){
 			
 			//Check for label in the beginning of The line and set it.
 			if (curTokenParsing.getTokenType()!=TokenType.NUM){
-				//check for end.should be [sapce][EOF]
-				if (curTokenParsing.getTokenType()==TokenType.SPACE){
-					TokenGenerator.advanceToNextToken();
-					if (curTokenParsing.getTokenType()==TokenType.EOF){
-						endedCorrctly=true;
-						break;
-					}
-				}
-				errorInCode=true;
-				errorLines.add(lineNumber);
-				errorMassages.add(errorStart + "prev" + currLabel +":there is no label number.\n");
-				continue;
+				
+				err = true;
+				break;
 			}
 			if(currLabel >= Integer.parseInt(curTokenParsing.getRep())){
-				errorInCode=true;
-				errorLines.add(lineNumber);
-				errorMassages.add(errorStart + currLabel +": this label number is greater than the previous one.\n");
-				continue;
+				err = true;
+				break;
 			}
 			else{
 				currLabel=Integer.parseInt(curTokenParsing.getRep());
@@ -51,25 +35,19 @@ public class Parser {
 			TokenGenerator.advanceToNextToken(); // advance to next token
 			
 			if (curTokenParsing.getTokenType()!=TokenType.SPACE){
-				errorInCode=true;
-				errorLines.add(lineNumber);
-				errorMassages.add(errorStart + currLabel +": no space after label number.\n");
-				continue;
+				err = true;
+				break;
 			}
 			TokenGenerator.advanceToNextToken();
 			if (curTokenParsing.getTokenType()!=TokenType.COLON){
-				errorInCode=true;
-				errorLines.add(lineNumber);
-				errorMassages.add(errorStart + currLabel +": no colon after label number.\n");
-				continue;
+				err = true;
+				break;
 			}
 			TokenGenerator.advanceToNextToken();
 			
 			if (curTokenParsing.getTokenType()!=TokenType.SPACE){
-				errorInCode=true;
-				errorLines.add(lineNumber);
-				errorMassages.add(errorStart + currLabel +": no space after label colon.\n");
-				continue;
+				err = true;
+				break;
 			}
 			
 			//Get first command token and handle
@@ -77,20 +55,16 @@ public class Parser {
 			ICommand lineCommands=parseCommand();
 			
 			if (lineCommands==null){ // failed to parse
-				errorInCode=true;
-				errorLines.add(lineNumber);
-				errorMassages.add(errorStart + currLabel + ": "+curLineMistake +"\n");
-				continue;
+				err = true;
+				break;
 			}
 			
 			//check [SPACE][SEM-COL][NEWLINE][SPACE] (older)
 			// check [NEWLINE]
 			TokenGenerator.advanceToNextToken();
 			if (curTokenParsing.getTokenType()!=TokenType.NEWLINE){
-				errorInCode=true;
-				errorLines.add(lineNumber);
-				errorMassages.add(errorStart + currLabel +": an incorrectline end- should be [SPACE][SEM-COL][NEWLINE][SPACE].\n");
-				continue;
+				err = true;
+				break;
 			}
 			/*TokenGenerator.advanceToNextToken();
 			if (curTokenParsing.getTokenType()!=TokenType.SPACE){
@@ -118,14 +92,14 @@ public class Parser {
 			
 		}
 		
-		endedCorrctly=true;
-		if (errorInCode || !endedCorrctly){
-			if(!endedCorrctly){
-				errorLines.add(++lineNumber);
-				errorMassages.add("an incorrect ending to the program.Should be [space][EOF].");
-			}
+		if(err)
+		{
+			Main.PrintError(lineCounter, 1);
 			return null;
 		}
+		/* add final check here */
+		
+		
 		return statementList;
 	}
 	
@@ -148,7 +122,6 @@ public class Parser {
 			curCommand=printParsing();
 			break;
 		default:
-			curLineMistake="no such type of command exist";
 			return null; /* should not happen */
 		}
 
@@ -159,58 +132,57 @@ public class Parser {
 	// note that upon entry token is set to IF
 	// returns null if parsing fails
 	private static Commands.ifCommand ifParsing(){
-		String correctFormat="The correct format should be - if (var boolOp var) command.";
 		
 		Token curTokenParsing = TokenGenerator.currentToken; // fetch token reference from lexer
 		TokenGenerator.advanceToNextToken();                 // advance to next token
 		if (curTokenParsing.getTokenType()!=TokenType.LPAR){
-			curLineMistake="after if there should be a left bracket."+correctFormat;
+			// Syntax error and out
 			return null;
 		}
 		
 		TokenGenerator.advanceToNextToken();
 		if (curTokenParsing.getTokenType()!=TokenType.VAR){
-			curLineMistake="after the left bracket should come a variable."+ correctFormat;
+			// Syntax error and out
 			return null;
 		}
 		Variable leftVar=Variable.GetVar(curTokenParsing.getRep()); // fetch variable
 		
 		TokenGenerator.advanceToNextToken();
 		if (curTokenParsing.getTokenType()!=TokenType.SPACE){
-			curLineMistake="after the first variable should come a space."+correctFormat;
+			// Syntax error and out
 			return null;
 		}
 		
 		TokenGenerator.advanceToNextToken();
 		if (curTokenParsing.getTokenType()!=TokenType.BOOLOP){
-			curLineMistake="after the first variable and a space should come the boolean expression."+correctFormat;
+			// Syntax error and out
 			return null;
 		}
 		Operation boolOp = Operation.getOpByString(curTokenParsing.getRep());
 		
 		TokenGenerator.advanceToNextToken();
 		if (curTokenParsing.getTokenType()!=TokenType.SPACE){
-			curLineMistake="after the boolean expression should come a space."+correctFormat;
+			// Syntax error and out
 			return null;
 		}
 		
 		TokenGenerator.advanceToNextToken();
 		if (curTokenParsing.getTokenType()!=TokenType.VAR){
-			curLineMistake="after the boolean expression and a space should come the second variable."+correctFormat;
+			// Syntax error and out
 			return null;
 		}
 		Variable rightVar=Variable.GetVar(curTokenParsing.getRep());
 		
 		TokenGenerator.advanceToNextToken();
 		if (curTokenParsing.getTokenType()!=TokenType.RPAR){
-			curLineMistake="after the second variable should come the right bracket."+correctFormat;
+			// Syntax error and out
 			return null;
 		}
 		
 		// check last space after if structure
 		TokenGenerator.advanceToNextToken();
 		if (curTokenParsing.getTokenType()!=TokenType.SPACE){
-			curLineMistake="after the right bracket should come a space."+correctFormat;
+			// Syntax error and out
 			return null;
 		}
 		
@@ -219,7 +191,7 @@ public class Parser {
 		ICommand ifTrueCommand=parseCommand();
 		
 		if (ifTrueCommand==null){
-			curLineMistake="after the right bracket and a space should come a valid command."+correctFormat +"\tThe command wasn't valid because"+ curLineMistake;
+			// Syntax error and out
 			return null;
 		}
 		
@@ -234,12 +206,12 @@ public class Parser {
 		TokenGenerator.advanceToNextToken();                 // advance to next token
 		
 		if (curTokenParsing.getTokenType()!= TokenType.SPACE){
-			curLineMistake="after the keyword goto there should be a space";
+			// Syntax error and out
 			return null;
 		}
 		TokenGenerator.advanceToNextToken();
 		if (curTokenParsing.getTokenType()!= TokenType.NUM){
-			curLineMistake="after the keyword goto the label number to which the program will jump should be indicated";
+			// Syntax error and out
 			return null;
 		}
 		return new Commands.gotoCommand(new Number(Integer.parseInt(curTokenParsing.getRep())));
@@ -255,29 +227,27 @@ public class Parser {
 			
 		TokenGenerator.advanceToNextToken();                 // advance to next token
 		if (curTokenParsing.getTokenType()!=TokenType.SPACE){
-			curLineMistake="in an assignment command, a space should come after the variable.";
+			// Syntax error and out
 			return null;
 		}
 		
 		TokenGenerator.advanceToNextToken();                 // advance to next token
 		if (curTokenParsing.getTokenType()!=TokenType.ASSIGN){
-			curLineMistake="a command that starts with variable shold be a assignment command, and after the variable := should appear.";
+			// Syntax error and out
 			return null;
 		}
 		
 		TokenGenerator.advanceToNextToken();                 // advance to next token
 		if (curTokenParsing.getTokenType()!=TokenType.SPACE){
-			curLineMistake="after the := should come a space.";
+			// Syntax error and out
 			return null;
 		}
 		// try to parse expression
 		TokenGenerator.advanceToNextToken();
 		IExpression rootExp=parseExp();
 		
-		if(rootExp == null){ // failed to parse expression
-			curLineMistake="failed to parse the expression in the assignment command." +curLineMistake;
+		if(rootExp == null) // failed to parse expression
 			return null;
-		}
 			
 		return new Commands.assignCommand(toAssign,rootExp);
 	}
@@ -290,20 +260,18 @@ public class Parser {
 		IExpression toPrint = null;
 		TokenGenerator.advanceToNextToken();                 // advance to next token
 		if (curTokenParsing.getTokenType()!=TokenType.LPAR){
-			curLineMistake="after the print keyword there should be a left bracket.";
+			// Syntax error and out
 			return null;
 		}
 		
 		// try to parse expression to print
 		TokenGenerator.advanceToNextToken();
 		toPrint = parseExp();
-		if(toPrint == null){
-			return null;
-		}
+		if(toPrint == null) return null;
 		
 		TokenGenerator.advanceToNextToken();                 // advance to next token
 		if (curTokenParsing.getTokenType()!=TokenType.RPAR){
-			curLineMistake="failed to parse the expression in the print command." +curLineMistake;
+			// Syntax error and out
 			return null;
 		}
 		return new Commands.printCommand(toPrint);
@@ -328,35 +296,31 @@ public class Parser {
 			IExpression exp;
 			TokenGenerator.advanceToNextToken();
 			if (curTokenParsing.getTokenType()!=TokenType.SPACE){
-				curLineMistake="there should be space after a binary operation.";
+				// Syntax error and out
 				return null;
 			}
 			// first expression
 			TokenGenerator.advanceToNextToken();
 			exp = parseExp();
-			if(exp == null) {
-				return null; // parsing error
-			}
+			if(exp == null) return null; // parsing error
 			rootBinOp.setFirstExp(exp);
 			
 			TokenGenerator.advanceToNextToken();
 			if (curTokenParsing.getTokenType()!=TokenType.SPACE){
-				curLineMistake="after the binary operation and the first expression, there should be a space.";
+				// Syntax error and out
 				return null;
 			}
 			
 			// second expression
 			TokenGenerator.advanceToNextToken();
 			exp = parseExp();
-			if(exp == null) {
-				return null; // parsing error
-			}
+			if(exp == null) return null; // parsing error
 			rootBinOp.setSecondExp(exp);
 	
 			root=rootBinOp;
 			break;
 		default:
-			curLineMistake="an valid expression.";
+			// Syntax error and out
 			return null;
 		}
 		
