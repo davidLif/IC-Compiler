@@ -7,10 +7,11 @@ import java.io.IOException;
 import java.io.PushbackInputStream;
 
 
-
-
-
-
+/* 
+ * class generates tokens, one by one, for the parser 
+ * currentToken is a singleton to contain current token, and will be updated in-place by the class,
+ * each time advanceToNextToken is called
+ */
 public class TokenGenerator {
 
 	public static Token currentToken;
@@ -46,7 +47,7 @@ public class TokenGenerator {
 			nextChar = buffer.read();
 			if(nextChar == -1) {
 				// invalid EOF, push string back
-				for(int j = i-1; j >= 0; ++j)
+				for(int j = i-1; j >= 0; --j)
 					buffer.unread(keyword.charAt(j));
 				return false;
 			}
@@ -57,7 +58,8 @@ public class TokenGenerator {
 			{
 				// doesn't fit the string
 				// push the string back on buffer
-				for(int j = i; j >= 0; --j)
+				buffer.unread(c);
+				for(int j = i-1; j >= 0; --j)
 				{
 					buffer.unread(keyword.charAt(j));
 				}
@@ -74,9 +76,11 @@ public class TokenGenerator {
 	
 	
 	/* keywords in our program language */
-	private static final String gotoStr = "goto";
-	private static final String printStr = "print";
-	private static final String ifStr = "if";
+	public static final String gotoStr = "goto";
+	public static final String printStr = "print";
+	public static final String ifStr = "if";
+	/* special sequence to mark end of statement */
+	public static final String lineSeperator = " ;\n";
 	
 	/* 
 	 * method to advance to the next token (updates currentToken)
@@ -94,7 +98,7 @@ public class TokenGenerator {
 					char c = (char)nextChar;
 					
 					// search for keywords
-					String[] keywords = {gotoStr, printStr, ifStr };
+					String[] keywords = {gotoStr, printStr, ifStr, lineSeperator };
 					for(int i = 0; i < keywords.length; ++i)
 					{
 						if(c == keywords[i].charAt(0))
@@ -110,13 +114,12 @@ public class TokenGenerator {
 					}
 					
 					/* 
-					 *  take care of single character tokens (that are not prefixes to valid tokens)
+					 *  take care of single character tokens (that are not prefixes to other valid tokens)
 					 *  including variables
 					 */
-					if(c == ' ' || c == '\n' || c == ';' || c == '0' || c == '+' || c == '-' || c == '*' || c == '\\'
-							|| c == '(' || c == ')' ||  Character.isAlphabetic(c))
+					if(c == ' ' || /* c == '\n' || c == ';' ||*/  c == '0' || c == '+' || c == '-' || c == '*' || c == '\\'
+							|| c == '(' || c == ')' || Character.isAlphabetic(c))
 					{
-				
 						TokenGenerator.updateTokenByRep(Character.toString(c));
 						return false;
 					}
@@ -249,13 +252,13 @@ public class TokenGenerator {
 	}
 	
 
-	
+	private static final int maxBufferUnread = 10;
 	/* method initiates TokenGenerator by giving the input file name
 	 * method opens the file for reading */
 	public static void initTokenGenerator(String fileName){
 		
 		try {
-			buffer = new PushbackInputStream(new FileInputStream(fileName));
+			buffer = new PushbackInputStream(new FileInputStream(fileName), maxBufferUnread);
 			/* create dummy token */
 			TokenGenerator.currentToken = new Token(null, "#"); 
 		} catch (FileNotFoundException e) {

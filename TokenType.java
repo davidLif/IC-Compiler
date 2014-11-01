@@ -6,7 +6,7 @@
  * 		NUM- valid number
  * 		BINO- binary operation: +, *, -, \ 
  * 		COLON- colon :
- * 		ENDLINE- semicolon followed by a new line char ;\n 
+ * 		ENDLINE- space followed by semicolon followed by a new line char ;\n 
  * 		RPAR- right bracket )
  * 		LPAR - left bracket (
  * 		IF - if
@@ -19,35 +19,35 @@
  */
 
 public enum TokenType {
-	VAR, NUM, BINOP, COLON, NEWLINE, RPAR, LPAR,
-	IF, BOOLOP, PRINT, GOTO, ASSIGN, EOF, SPACE, SEMCOL;
-	
+	VAR, NUM, BINOP, COLON, RPAR, LPAR, NEWLINE,
+	IF, BOOLOP, PRINT, GOTO, ASSIGN, EOF, SPACE;
+
 	
 	/* method returns TokenType by suiting string representation */
 	public static TokenType getTypeByString(String rep)
 	{
-		if(rep.equals(";"))
-			return SEMCOL;
+		
 		if(rep.equals(  ":"))
 			return COLON;
-		if(rep.equals(  "if"))
+		if(rep.equals(TokenGenerator.ifStr))
 			return IF;
-		if(rep.equals(  "print"))
+		if(rep.equals(TokenGenerator.printStr))
 			return PRINT;
-		if(rep.equals(  "\n"))
-			return NEWLINE;
 		if(rep.equals(  "("))
 			return LPAR;
 		if(rep.equals( " "))
 			return SPACE;
 		if(rep.equals( ")"))
 			return RPAR;
-		if(rep.equals("goto"))
+		if(rep.equals(TokenGenerator.gotoStr))
 			return GOTO;
 		if(rep.equals(":="))
 			return ASSIGN;
 		if(rep.equals("EOF"))
 			return EOF;
+		if(rep.equals(TokenGenerator.lineSeperator))
+			return NEWLINE;
+		
 		char c = rep.charAt(0);
 		if(Character.isAlphabetic(c))
 			return VAR;
@@ -75,8 +75,8 @@ public enum TokenType {
 			return "NEWLINE";
 		case SPACE:
 			return "SPACE";
-		case SEMCOL:
-			return "SEMCOL";
+		//case SEMCOL:
+		//	return "SEMCOL";
 		case RPAR:
 			return "RPAR";
 		case LPAR:

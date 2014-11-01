@@ -9,50 +9,97 @@ public class Processor {
 
 	/* index of next statement to execute */
 	private static int nextStatementIndex;
-	private static boolean goToHasTakenPlace;
 	
 	/* statement list to execute */
 	private static List<Statement> statementList;
 	
-	private static Map<Integer,Integer> labelIndexMap; /* we map each label number to his statement index number */
-
+	/* we map each label number to his statement index number in statementList */
+	private static Map<Integer,Integer> labelIndexMap; 
+	
+	/* flag to indicate whether a command used a goto command */
+	private static boolean goToHasTakenPlace = false;
+	
+	/* flag to indicate that a code 4 error has occurred, i.e. a program used an uninitialized variable */
+	private static boolean variableErrorFlag = false;
+	
+	
+	
 	/*
+	 * method interprets the code, represented by the given statementList
 	 * statmentList - list of statements to execute, by order or by jump
 	 */
-	public Processor(List<Statement> statementList)
+	public static void Process(List<Statement> statementList)
+	{
+		// init required fields and data structures
+		Processor.InitProcessor(statementList);
+		
+		/* execute the statements until we have reached the final one */
+		while(nextStatementIndex < statementList.size())
+		{
+			/* execute the command inside the statement
+			 */
+			Statement currStatement = statementList.get(nextStatementIndex);
+			try {
+				currStatement.getCommand().execute();
+			}
+			catch (IllegalArgumentException e)
+			{
+				/* devision by zero was caught, report as error code 5*/
+				Main.PrintError(labelIndexMap.get(currStatement.getLabel()) + 1, 5);
+				return;
+			}
+			
+			/* check code 4 error */
+			if(variableErrorFlag)
+			{
+				/* report uninitialized variable error on current line */
+				Main.PrintError(labelIndexMap.get(currStatement.getLabel()) + 1, 4);
+				return;
+			}
+		
+			
+			/* check if goto jump was made */
+			if(goToHasTakenPlace)
+			{
+				/* turn the flag off before moving to next statement */
+				goToHasTakenPlace = false;
+			}
+			else
+			{
+				/* simple advance to next statement in list */
+				++nextStatementIndex;
+			}
+			
+		}
+			
+	}
+	
+	
+	/* method initialized fields and data structures required for processing the code */
+	private static void InitProcessor(List<Statement> statementList)
 	{
 		// init fields
 		Processor.statementList = statementList;
 		Processor.nextStatementIndex = 0;
+		
+		// init label to statement index map
 		labelIndexMap = new HashMap<Integer,Integer>();
 		initiateStatementLabelMap();
 	}
 	
-	public static int getindex()
+	/*
+	 * set index of new statement to execute, by label.
+	 * (useful for goto commands)
+	 */
+	public static void gotoLabel(int label)
 	{
-		return nextStatementIndex;
-	}
-	
-	public static void increaseIndex()
-	{
-		 nextStatementIndex++;
-	}
-	
-	public static void turnOnGoToFlag()
-	{
+		nextStatementIndex =  labelIndexMap.get(label);
 		goToHasTakenPlace = true;
 	}
 	
-	public static void turnOffGoToFlag()
-	{
-		goToHasTakenPlace = false;
-	}
-
 	
-	
-	
-	/* Initiate the map so each label number corresponds with the index of the statement */
-	public void initiateStatementLabelMap()
+	/* Initiate the map so each label number corresponds with the index of the statement in statementList*/
+	private static void initiateStatementLabelMap()
 	{
 		for(int i =0; i < statementList.size(); i++)
 		{
@@ -60,47 +107,15 @@ public class Processor {
 		}	
 	}
 	
-	/*
-	 * set index of new statement to execute, by label.
-	 * (useful for goto)
+
+	
+	/* 
+	 * this method sets the error flag to true,
+	 * i.e a variable was used without being initialized in current statement
 	 */
-	
-	public static void gotoLabel(int label)
+	public static void turnOnErrorFlag()
 	{
-		nextStatementIndex =  getIndexFromLine(label);
-		
-	}
-	
-	/* given  a label number - returns the statement index that corresponds with it */
-	public static int getIndexFromLine(int line)
-	{
-		return labelIndexMap.get(line);
-	}
-	
-	
-	/*process the statements*/
-	public void process()
-	{
-		while ( nextStatementIndex <= statementList.size() - 1)
-		{
-			try {
-				statementList.get(nextStatementIndex).getCommand().execute();
-			} catch (NullPointerException e) {
-				Main.PrintError(Processor.getindex() + 1, 4); /* The variable was not initialized */
-				return;
-			} catch (Exception e) {
-				System.out.println("lexer or parser problem"); /*denis please remove this statment after lexer and parser work */
-			}
-			if( !goToHasTakenPlace ) /*we need to proceed to the next statement */
-			{
-				increaseIndex();
-			}
-			else
-			{
-				turnOffGoToFlag();
-			}
-		}
-		
+		variableErrorFlag = true;
 	}
 
 	

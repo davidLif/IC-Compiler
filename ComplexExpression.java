@@ -1,5 +1,3 @@
-import java.util.function.BinaryOperator;
-
 
 public class ComplexExpression implements IExpression{
 
@@ -21,15 +19,18 @@ public class ComplexExpression implements IExpression{
 		this.secExp = exp;
 	}
 	
+	/* method evaluates expression's value, returns null if some variable that was
+	 * used in the expression was not initialized when used (code 4)
+	 */
 	@Override
-	public Integer evaluate() 
-	{
-		
-		return  Operation.computeBinaryOperation(binaryOp, firstExp.evaluate() ,secExp.evaluate());
-	}
-	
-	
+	public Integer evaluate() {
+		Integer firstExpVal, secExpVal;
+		firstExpVal = firstExp.evaluate();
+		secExpVal =   secExp.evaluate();
 
+		if(firstExpVal == null || secExpVal == null ) return null;
+		return  Operation.computeBinaryOperation(binaryOp, firstExpVal , secExpVal);
+	}
 	
 	@Override
 	public String toString()

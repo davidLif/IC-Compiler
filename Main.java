@@ -19,42 +19,10 @@ public class Main {
 		
 		// init token generator, give file name
 		TokenGenerator.initTokenGenerator(args[0]);
-		
-				//if(TokenGenerator.advanceToNextToken())
-				//{
-					// err
-				//	System.out.println("invalid token\n");
-				//	return;
-				//}
-//		Token tok = TokenGenerator.currentToken;
-//			while(tok.getTokenType() != TokenType.EOF){
-//				
-//				System.out.print(" [ " + tok.getTokenType().toString()
-//						+ " " + tok.getRep() + " ] ");
-//				if(TokenGenerator.advanceToNextToken())
-//				{
-//					// err
-//					System.out.println("invalid token\n");
-//					return;
-//				}
-//			}
-//			System.out.print(" [ " + tok.getTokenType().toString()
-//					+ " " + tok.getRep() + " ] ");
-//			
-			
-			//TokenGenerator.initTokenGenerator(args[0]);
-		
-			List<Statement> statements = Parser.parseProgram();
-			if(statements == null) System.out.println("error!!");
-			System.out.println(statements);
-			
-			Processor processorEngine  = new Processor (statements);
-			System.out.println("procesor result is: ");
-			processorEngine.process();
-			
-			
-			
-			
+	
+		List<Statement> st = Parser.parseProgram();
+		//System.out.println(st);
+		Processor.Process(st);
 	}
 	
 

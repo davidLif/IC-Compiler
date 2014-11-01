@@ -10,20 +10,24 @@ public class Parser {
 	// Method parses the given program and returns a list of statements.
 	public static List<Statement> parseProgram()
 	{
-		List<Statement> statementList=new ArrayList<Statement>();  //The statement list- a representation of the program.
-		int currLabel = -1; //last seen label  (monotone growth checking)
-		int lineCounter = 0;   // variable to count lines
+		List<Statement> statementList=new ArrayList<Statement>();//This is the statement list- a representation of the program.
+		int currLabel = -1; //Variable to maintain last seen label, to ensure monotone growth.
+		int lineCounter = 1;   // variable to count lines
 		Token curTokenParsing = TokenGenerator.currentToken; // fetch token reference from lexer
+		
+		boolean err = false; // error flag, note that we count the lines
+		
 		for ( TokenGenerator.advanceToNextToken() ; curTokenParsing.getTokenType()!=TokenType.EOF; TokenGenerator.advanceToNextToken(), ++lineCounter){
 			
 			//Check for label in the beginning of The line and set it.
 			if (curTokenParsing.getTokenType()!=TokenType.NUM){
-				// Syntax error and out
-				return null;
+				
+				err = true;
+				break;
 			}
 			if(currLabel >= Integer.parseInt(curTokenParsing.getRep())){
-				// Syntax error and out
-				return null;
+				err = true;
+				break;
 			}
 			else{
 				currLabel=Integer.parseInt(curTokenParsing.getRep());
@@ -31,19 +35,19 @@ public class Parser {
 			TokenGenerator.advanceToNextToken(); // advance to next token
 			
 			if (curTokenParsing.getTokenType()!=TokenType.SPACE){
-				// Syntax error and out
-				return null;
+				err = true;
+				break;
 			}
 			TokenGenerator.advanceToNextToken();
 			if (curTokenParsing.getTokenType()!=TokenType.COLON){
-				// Syntax error and out
-				return null;
+				err = true;
+				break;
 			}
 			TokenGenerator.advanceToNextToken();
 			
 			if (curTokenParsing.getTokenType()!=TokenType.SPACE){
-				// Syntax error and out
-				return null;
+				err = true;
+				break;
 			}
 			
 			//Get first command token and handle
@@ -51,36 +55,48 @@ public class Parser {
 			ICommand lineCommands=parseCommand();
 			
 			if (lineCommands==null){ // failed to parse
-				return null;
+				err = true;
+				break;
 			}
 			
-			//check [SPACE][SEM-COL][NEWLINE][SPACE]
+			//check [SPACE][SEM-COL][NEWLINE][SPACE] (older)
+			// check [NEWLINE]
 			TokenGenerator.advanceToNextToken();
+			if (curTokenParsing.getTokenType()!=TokenType.NEWLINE){
+				err = true;
+				break;
+			}
+			/*TokenGenerator.advanceToNextToken();
 			if (curTokenParsing.getTokenType()!=TokenType.SPACE){
-				// Syntax error and out
-				return null;
+				err = true;
+				break;
 			}
 			TokenGenerator.advanceToNextToken();
 			if (curTokenParsing.getTokenType()!=TokenType.SEMCOL){
-				// Syntax error and out
-				return null;
+				err = true;
+				break;
 			}
 			TokenGenerator.advanceToNextToken();
 			if (curTokenParsing.getTokenType()!=TokenType.NEWLINE){
-				// Syntax error and out
-				return null;
+				err = true;
+				break;
 			}
 			TokenGenerator.advanceToNextToken();
 			if (curTokenParsing.getTokenType()!=TokenType.SPACE){
-				// Syntax error and out
-				return null;
-			}
+				err = true;
+				break;
+			}*/
+			
 			// otherwise, valid statement
 			statementList.add(new Statement(currLabel,lineCommands));
 			
 		}
 		
-		
+		if(err)
+		{
+			Main.PrintError(lineCounter, 1);
+			return null;
+		}
 		/* add final check here */
 		
 		

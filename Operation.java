@@ -42,6 +42,8 @@ public enum Operation {
 	
 	/* method computes binary operation op on two given inputs, x and y [ *, +, -, \ ]
 	 * if a boolean operation is given by mistake, method returns 0
+	 * 
+	 * note: on illegal operation, e.g. devision by zero, IllegalArgumentException is thrown.
 	 */
 	public static int computeBinaryOperation(Operation op, int x, int y)
 	{
@@ -55,10 +57,10 @@ public enum Operation {
 		case MUL:
 			return x*y;
 		case DIV:
+			if(y == 0) { throw new IllegalArgumentException("Devision by zero"); }
 			return x/y;
-		default: /* denis - returning 0 is wrong. it can be the real output. we might need to add execptions*/
-			System.out.println("Error evaluating the op");
-			return -1; /* change that!*/
+		default:
+			return 0;
 			
 		}
 	}
@@ -84,7 +86,7 @@ public enum Operation {
 		case NOTEQ:
 			return x != y;
 		default:
-			return false; /* denis - we might ned to add expection - false is a legitimc result */
+			return false;
 			
 		}
 	}
