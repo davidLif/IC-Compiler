@@ -22,7 +22,9 @@ public class Main {
 				PrintError(Parser.errorLines.get(i),Parser.errorMassages.get(i));
 			}
 		}
+		else{
 		Processor.Process(st);
+	}
 	}
 	
 
@@ -30,7 +32,7 @@ public class Main {
 		System.out.println(""+val);
 	}
 	
-	public static void PrintError(int line , String code) {
+	public static void PrintError(int line , int code) {
 		System.out.println("Error! Line:"+line+" Code:"+code);
 	}
 	
