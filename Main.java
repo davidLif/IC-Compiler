@@ -48,6 +48,11 @@ public class Main {
 			if(statements == null) System.out.println("error!!");
 			System.out.println(statements);
 			
+			Processor processorEngine  = new Processor (statements);
+			System.out.println("procesor result is: ");
+			processorEngine.process();
+			
+			
 			
 			
 	}

@@ -37,8 +37,15 @@ public class Variable implements IExpression {
 	 * returns null if variable was not initialized
 	 */
 	@Override 
-	public Integer evaluate()
+	public Integer evaluate() throws NullPointerException
 	{
+		Integer result = value;
+		if (result == null) /* The variable was not initialized - run time error */
+		{
+			throw new NullPointerException();
+		}
+			
+		
 		return this.value;
 		
 	}

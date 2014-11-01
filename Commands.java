@@ -11,7 +11,7 @@ public class Commands {
 		private ICommand commandToTake;
 
 		@Override
-		public void execute() {	
+		public void execute() throws NullPointerException, Exception {	
 			if(Operation.computeBooleanOperation(booleanOp, leftVar.evaluate(), rightVar.evaluate()))
 			{
 				commandToTake.execute();
@@ -45,6 +45,7 @@ public class Commands {
 		@Override
 		public void execute() {
 			Processor.gotoLabel(labelNumber.evaluate());
+			Processor.turnOnGoToFlag();
 		}
 		
 		@Override
@@ -60,7 +61,6 @@ public class Commands {
 		@Override
 		public void execute() {
 			Main.Print(exp.evaluate());
-			Processor.increaseIndex();
 			return;
 			
 		}
@@ -85,7 +85,6 @@ public class Commands {
 		public void execute() 
 		{
 			Variable.setVal(var, exp.evaluate());
-			Processor.increaseIndex();
 		}
 		
 		public assignCommand(Variable var,IExpression exp){

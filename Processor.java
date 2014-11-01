@@ -9,6 +9,7 @@ public class Processor {
 
 	/* index of next statement to execute */
 	private static int nextStatementIndex;
+	private static boolean goToHasTakenPlace;
 	
 	/* statement list to execute */
 	private static List<Statement> statementList;
@@ -27,9 +28,24 @@ public class Processor {
 		initiateStatementLabelMap();
 	}
 	
+	public static int getindex()
+	{
+		return nextStatementIndex;
+	}
+	
 	public static void increaseIndex()
 	{
 		 nextStatementIndex++;
+	}
+	
+	public static void turnOnGoToFlag()
+	{
+		goToHasTakenPlace = true;
+	}
+	
+	public static void turnOffGoToFlag()
+	{
+		goToHasTakenPlace = false;
 	}
 
 	
@@ -67,10 +83,23 @@ public class Processor {
 	{
 		while ( nextStatementIndex <= statementList.size() - 1)
 		{
-			statementList.get(nextStatementIndex).getCommand().execute();
+			try {
+				statementList.get(nextStatementIndex).getCommand().execute();
+			} catch (NullPointerException e) {
+				Main.PrintError(Processor.getindex() + 1, 4); /* The variable was not initialized */
+				return;
+			} catch (Exception e) {
+				System.out.println("lexer or parser problem"); /*denis please remove this statment after lexer and parser work */
+			}
+			if( !goToHasTakenPlace ) /*we need to proceed to the next statement */
+			{
+				increaseIndex();
+			}
+			else
+			{
+				turnOffGoToFlag();
+			}
 		}
-		
-		
 		
 	}
 
