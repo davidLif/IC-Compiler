@@ -55,17 +55,8 @@ public enum TokenType {
 			return NUM;
 		if(c == '*' || c == '+' || c == '-' || c == '\\')
 			return BINOP;
-		if (c == '<' || c =='>'){
+		// no other option
 		return BOOLOP;
-	}
-		if (rep.length()<2){
-			return INVALID;
-		}
-		char c1= rep.charAt(1);
-		if (( c == '<' || c =='>' || c == '=' ||c == '!') && (c1=='=')){
-			return BOOLOP;
-		}
-		return INVALID;
 	}
 	
 	public String ToString()
@@ -84,8 +75,6 @@ public enum TokenType {
 			return "NEWLINE";
 		case SPACE:
 			return "SPACE";
-		//case SEMCOL:
-		//	return "SEMCOL";
 		case RPAR:
 			return "RPAR";
 		case LPAR:
@@ -102,6 +91,8 @@ public enum TokenType {
 			return "EOF";
 		case BOOLOP:
 			return "BOOLOP";
+		case INVALID:
+			return "INVALID";
 			
 		}
 		return null;

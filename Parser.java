@@ -7,54 +7,77 @@ import java.util.Set;
 
 public class Parser {
 	
-	private static boolean errorInCode=false;//this variable assigned "true" if there was at least one mistake in the code.
-	private static boolean gotoError=false;//this variable get true if the current line we parsing has an goto command which points to non-existent label. This helps with adding the correct error code.
+	private static boolean errorInCode=false;//this variable assigned "true" if there was at least one mistake (of all types 1-3) in the code.
+	private static boolean possibleGoToError=false;  //this variable gets true if the current line we parsing has an goto command which points to a label we haven't discovered yet
+											        
 	
-	public static List<Integer> codeOneErrors=new ArrayList<>();
-	public static List<Integer> codeThreeErrors=new ArrayList<>();
-	public static List<Integer> codeTwoErrors=new ArrayList<>();//this holds all the goto command which point to the future, so we will be able to check them later
+	public static List<Integer> codeOneErrors=new ArrayList<Integer>();       // lines with code one error(s)
+	public static List<Integer> codeThreeErrors=new ArrayList<Integer>();     // lines with code three error(s)
+	public static List<Integer> codeTwoErrors=new ArrayList<Integer>();   //this holds all the lines of goto commands which jump to labels that don't exist.
 	
-	private static List<Integer[]> qlabels=new ArrayList<>();//all the goto label that may be in the future;
-	private static Set<Integer> labelSet=new HashSet<Integer>();//this set holds all the labels we saw till now in the parsing.
-	private static int qLabel;
+	private static List<Integer[]> qlabels=new ArrayList<Integer[]>();// all the goto label commands that MAY jump to labels that don't exist
+	                                                                  // format: list of tuples (line, label to jump to)
+	private static Set<Integer> labelSet=new HashSet<Integer>();// this set holds all the labels we saw till now in the parsing.
+	private static int qLabel;                                  // if current command is a goto, this variable will hold the jump to label
+	
+	
+	/* method handles syntax error (code 1) 
+	 * adds the line to the proper lists, and removes from other lists if needed
+	 * the label, if was added, is also removed.
+	 * (if label was not added to labelSet, specifiy label as null )
+	 */
+	
+	private static void setSyntaxError(Integer line, Integer label)
+	{
+		/* add error code 1 */
+		addError(line, 1);
+		/* now, remove other errors, and remove label from set*/
+		if(codeTwoErrors.contains(line)) codeTwoErrors.remove(line);
+		if(codeThreeErrors.contains(line)) codeTwoErrors.remove(line);
+		if(label != null ) // label was set
+			labelSet.remove(label);
+	}
 	
 	// Method parses the given program and returns a list of statements.
-	// If there is an error in this code, the function returns null.
+	// If there is an error [1-3] in the given code, the function returns null.
 	public static List<Statement> parseProgram()
 	{
 		List<Statement> statementList=new ArrayList<Statement>();//This is the statement list- a representation of the program.
-		int currLabel = -1; //Variable to maintain last seen label, to ensure monotone growth.
-		int lineNumber=1;
+		int lastCorrectLabel = -1; //Variable to maintain last (correct) seen label, to ensure monotone growth.
+		int lineNumber = 1;
 		
 		Token curTokenParsing = TokenGenerator.currentToken; // fetch token reference from lexer.
 		
-		for (;curTokenParsing.getTokenType()!=TokenType.EOF;++lineNumber){
-			gotoError=false;
-			if(lineNumber!=1){//we cann't have an error in "0 line"(doesn't exist).
-				for(;curTokenParsing.getTokenType()!=TokenType.NEWLINE && curTokenParsing.getTokenType()!=TokenType.EOF;TokenGenerator.advanceToNextToken());//advance from error to next line (if there was error)
+		for (; curTokenParsing.getTokenType()!=TokenType.EOF; ++lineNumber){
+			
+			
+			if(lineNumber != 1){
+				/* check if we are not on NEWLINE token, meaning that, previous iteration could not find NEWLINE token
+				 * if so, we will try to find the next newline (if possible) and continue parsing
+				 * also note that, if lineNumber == 1 we did not have a previous iteration.
+				 */
+				for(;curTokenParsing.getTokenType()!= TokenType.NEWLINE && curTokenParsing.getTokenType()!=TokenType.EOF;
+						TokenGenerator.advanceToNextToken());
+				if(curTokenParsing.getTokenType() == TokenType.EOF)
+				{
+					// could not find next line.
+					break;
+				}
 			}
-			if (curTokenParsing.getTokenType()==TokenType.EOF){
-				break;//This is activated in an extremely particular case- the last command had code 1 + didn't have TokenType.NEWLINE(;) and so while looking for the next line we met EOF.
-			}
+			
 			TokenGenerator.advanceToNextToken();
 			if (curTokenParsing.getTokenType()==TokenType.EOF){
-				break;//check if the previous line was the last command
+				//check if the previous line was the last command
+				//or if the program is an empty program (valid program)
+				break;
 			}
 			
-			
-			//Check for label in the beginning of The line and set it.
+			//Check for label in the beginning of The line
 			if (curTokenParsing.getTokenType()!=TokenType.NUM){
-				addError(lineNumber,1);
+				addError(lineNumber, 1);
 				continue;
 			}
-			if(currLabel >= Integer.parseInt(curTokenParsing.getRep())){
-				addError(lineNumber,3);
-				//continue;// check for code 1 and 2 errors anyway
-			}
-			else{
-				currLabel=Integer.parseInt(curTokenParsing.getRep());
-				labelSet.add(currLabel);
-			}
+			int newLabel = Integer.parseInt(curTokenParsing.getRep());
 			
 			TokenGenerator.advanceToNextToken();
 			if (curTokenParsing.getTokenType()!=TokenType.SPACE){
@@ -76,30 +99,55 @@ public class Parser {
 			
 			//Get first command token and handle
 			TokenGenerator.advanceToNextToken();
-			ICommand lineCommands=parseCommand();
+			ICommand lineCommands= parseCommand();
 			
 			
-			if (lineCommands==null){ // failed to parse
+			if (lineCommands==null){ // failed to parse, error 1
 				addError(lineNumber,1);
 				continue;
 			}
-			if (gotoError){//check for possible error in goto and add to qlabels(we will check it later);
+			if (possibleGoToError){
+				//there's a possible go to error in this line
+				//qLabel contains the jump to label of the goto command
 				qlabels.add(new Integer[]{lineNumber,qLabel});
+				/* reset go to error flag */
+				possibleGoToError= false;
 			}
 			
-			//check [SPACE][SEM-COL][NEWLINE][SPACE] (older)
-			// check [NEWLINE]
+			
+			// finally, check [NEWLINE]
 			TokenGenerator.advanceToNextToken();
 			if (curTokenParsing.getTokenType()!=TokenType.NEWLINE){
 				addError(lineNumber,1);
-				if (qlabels.get(qlabels.size()-1)[0]==lineNumber) {//if there is syntax error, no need to check label number
+				
+				/* the goto command is always in the end, and if now the line seperator is missing this whole line is 
+				 * invalid by code 1, so, we do not report other errors like invalid jumps
+				 */
+				
+				if (!qlabels.isEmpty() && qlabels.get(qlabels.size()-1)[0] == lineNumber) {
 					qlabels.remove(qlabels.size()-1);
 				}
+				
 				continue;
 			}
 			
-			// otherwise, valid statement( may have invalid goto,if there are we delete them later).
-			statementList.add(new Statement(currLabel,lineCommands));
+			/* if reached here, the line is valid by code 1*/
+			
+			labelSet.add(newLabel);
+			
+			/* check for error 3 (monotone labels) */
+			if(lastCorrectLabel >= newLabel){
+				addError(lineNumber, 3);
+				
+			}
+			else{
+				/* otherwise, set current label as max seen yet */
+				lastCorrectLabel= newLabel;
+			
+			}
+			
+			// otherwise, valid statement( may have invalid goto, if there are we delete them later).
+			statementList.add(new Statement(newLabel, lineCommands));
 			
 		}
 		if (checkGotoCommandLabels()){
@@ -213,7 +261,10 @@ public class Parser {
 		}
 		
 		if(!labelSet.contains(Integer.parseInt(curTokenParsing.getRep()))){
-			gotoError=true;
+			/* at this point, it is a possible goto error, however, we haven't seen all labels yet
+			 * we will make the final check in the end
+			 */
+			possibleGoToError= true;
 			qLabel=Integer.parseInt(curTokenParsing.getRep());
 		}
 		return new Commands.gotoCommand(new Number(Integer.parseInt(curTokenParsing.getRep())));
@@ -343,14 +394,14 @@ public class Parser {
 		errorInCode=true;
 	}
 	
-	//Check for all the goto commands label that we didn't manage to verify before,does those label exist.
+	//Check for all the goto commands label that we couldn't verify before, do those labels exist.
 	//if any error found,return true. else return false.
 	private static boolean checkGotoCommandLabels(){
 		boolean errorFound=false;
 		for (int i=0;i<qlabels.size();i++){
 			if(!labelSet.contains(qlabels.get(i)[1])){
 				errorFound=true;
-				addError(qlabels.get(i)[0],2);
+				addError(qlabels.get(i)[0], 2);
 			}
 		}
 		return errorFound;

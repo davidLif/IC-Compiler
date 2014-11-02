@@ -84,9 +84,9 @@ public class TokenGenerator {
 	
 	/* 
 	 * method to advance to the next token (updates currentToken)
-	 * returns true on syntax error, returns false on success
+	 * on invalid input (invalid token), error token is set in current token (with a unique id)
 	 */
-	public static boolean advanceToNextToken(){
+	public static void advanceToNextToken(){
 		
 	
 			int nextChar = 0;
@@ -108,7 +108,7 @@ public class TokenGenerator {
 							{
 								// it was on buffer (now popped out)
 								TokenGenerator.updateTokenByRep(keywords[i]);
-								return false;
+								return;
 							}
 						}
 					}
@@ -121,7 +121,7 @@ public class TokenGenerator {
 							|| c == '(' || c == ')' || Character.isAlphabetic(c))
 					{
 						TokenGenerator.updateTokenByRep(Character.toString(c));
-						return false;
+						return;
 					}
 					
 					/* take care of numbers (zero was checked before) */
@@ -144,13 +144,14 @@ public class TokenGenerator {
 								buffer.unread(c);
 								// update token
 								TokenGenerator.updateTokenByRep(number.toString());
-								return false;
+								return;
 								
 							}
 						}
 						
 						// reached here -> invalid EOF
-						return true;
+						setErrorToken();
+						return;
 					}
 					
 					/* take care of  : or := */
@@ -160,20 +161,23 @@ public class TokenGenerator {
 						// possible : or :=
 						nextChar = buffer.read();
 						if(nextChar == -1) // invalid EOF
-							return true;
+						{
+							setErrorToken();
+							return;
+						}
 						c = (char)nextChar;
 						if(c == '=')
 						{
 							// assignment
 							updateTokenByRep(":=");
-							return false;
+							return;
 						}
 						else
 						{
 							// colon
 							buffer.unread(c);
 							updateTokenByRep(":");
-							return false;
+							return;
 						}
 					}
 					
@@ -184,21 +188,25 @@ public class TokenGenerator {
 						// possible == or !=
 						nextChar = buffer.read();
 						if(nextChar == -1) // invalid EOF
-							return true;
+						{
+							setErrorToken();
+							return;
+						}
 						char nextC = (char)nextChar;
 						if(c == '=' && nextC == '=')
 						{
 							updateTokenByRep("==");
-							return false;
+							return;
 						}
 						else if (c == '!' && nextC == '=')
 						{
 							updateTokenByRep("!=");
-							return false;
+							return;
 						}
 						
 						// otherwise, invalid token
-						return true;
+						setErrorToken();
+						return;
 						
 					}
 					
@@ -208,28 +216,31 @@ public class TokenGenerator {
 						// possible <, >, <=, >=
 						nextChar = buffer.read();
 						if(nextChar == -1) // invalid EOF
-							return true;
+						{
+							setErrorToken();
+							return;
+						}
 						char nextC = (char)nextChar;
 						if(nextC == '=')
 						{
 							// <= or >=
 							updateTokenByRep(Character.toString(c) + "=");
-							return false;
+							return;
 						}
 						else
 						{
 							// < or >
 							buffer.unread(nextC);
 							updateTokenByRep(Character.toString(c));
-							return false;
+							return;
 						}
 					}
 					
 					else
 					{
-						// read something else ?
 						// invalid character
-						return true;
+						setErrorToken();
+						return;
 					}
 	
 				}
@@ -237,7 +248,7 @@ public class TokenGenerator {
 				// reached EOF
 				currentToken.update(TokenType.EOF, "EOF");
 				freeResources();
-				return false;
+				return;
 				
 						
 			} catch (IOException e) {
@@ -247,7 +258,6 @@ public class TokenGenerator {
 			}
 			
 			
-			return false;
 		
 	}
 	
@@ -279,6 +289,14 @@ public class TokenGenerator {
 			System.out.println("Error: could not close file\n");
 			e.printStackTrace();
 		}
+	}
+	
+	/* method sets the current token to represent an error (invalid token caught by the lexer )
+	 * error token's type is unique */
+	
+	private static void setErrorToken()
+	{
+		TokenGenerator.currentToken.update(TokenType.INVALID, "invalid");
 	}
 	
 	
