@@ -31,11 +31,14 @@ public class Parser {
 		for (;curTokenParsing.getTokenType()!=TokenType.EOF;++lineNumber){
 			gotoError=false;
 			if(lineNumber!=1){//we cann't have an error in "0 line"(doesn't exist).
-				for(;curTokenParsing.getTokenType()!=TokenType.NEWLINE;TokenGenerator.advanceToNextToken());//advance from error to next line (if there was error)
+				for(;curTokenParsing.getTokenType()!=TokenType.NEWLINE && curTokenParsing.getTokenType()!=TokenType.EOF;TokenGenerator.advanceToNextToken());//advance from error to next line (if there was error)
+			}
+			if (curTokenParsing.getTokenType()==TokenType.EOF){
+				break;//This is activated in an extremely particular case- the last command had code 1 + didn't have TokenType.NEWLINE(;) and so while looking for the next line we met EOF.
 			}
 			TokenGenerator.advanceToNextToken();
 			if (curTokenParsing.getTokenType()==TokenType.EOF){
-				break;
+				break;//check if the previous line was the last command
 			}
 			
 			
@@ -46,7 +49,7 @@ public class Parser {
 			}
 			if(currLabel >= Integer.parseInt(curTokenParsing.getRep())){
 				addError(lineNumber,3);
-				continue;
+				//continue;// check for code 1 and 2 errors anyway
 			}
 			else{
 				currLabel=Integer.parseInt(curTokenParsing.getRep());
@@ -101,9 +104,6 @@ public class Parser {
 		}
 		if (checkGotoCommandLabels()){
 			errorInCode=true;
-			for (int i : codeTwoErrors){
-				statementList.remove(i-1);
-			}
 		}
 		if (errorInCode){
 			return null;
