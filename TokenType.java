@@ -20,7 +20,7 @@
 
 public enum TokenType {
 	VAR, NUM, BINOP, COLON, RPAR, LPAR, NEWLINE,
-	IF, BOOLOP, PRINT, GOTO, ASSIGN, EOF, SPACE;
+	IF, BOOLOP, PRINT, GOTO, ASSIGN, EOF, SPACE, INVALID;
 
 	
 	/* method returns TokenType by suiting string representation */
@@ -55,8 +55,17 @@ public enum TokenType {
 			return NUM;
 		if(c == '*' || c == '+' || c == '-' || c == '\\')
 			return BINOP;
-		// no other option
+		if (c == '<' || c =='>'){
 		return BOOLOP;
+	}
+		if (rep.length()<2){
+			return INVALID;
+		}
+		char c1= rep.charAt(1);
+		if (( c == '<' || c =='>' || c == '=' ||c == '!') && (c1=='=')){
+			return BOOLOP;
+		}
+		return INVALID;
 	}
 	
 	public String ToString()

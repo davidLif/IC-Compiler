@@ -18,8 +18,14 @@ public class Main {
 		List<Statement> st = Parser.parseProgram();
 		if (st==null){//Found an error in the program.
 			//Print all the error massages
-			for(int i=0;i<Parser.errorMassages.size();i++){
-				PrintError(Parser.errorLines.get(i),Parser.errorMassages.get(i));
+			for(int i=0 ; i < Parser.codeOneErrors.size() ; i++){
+				PrintError(Parser.codeOneErrors.get(i),1);
+			}
+			for(int i=0 ; i < Parser.codeTwoErrors.size() ; i++){
+				PrintError(Parser.codeTwoErrors.get(i),2);
+			}
+			for(int i=0 ; i < Parser.codeThreeErrors.size() ; i++){
+				PrintError(Parser.codeThreeErrors.get(i),3);
 			}
 		}
 		else{

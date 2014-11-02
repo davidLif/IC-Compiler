@@ -7,10 +7,16 @@ import java.util.Set;
 
 public class Parser {
 	
-	public static List<Integer> errorMassages=new ArrayList<Integer>();//This list holds all the error massages we got while parsing.
-	public static List<Integer> errorLines=new ArrayList<Integer>();//This list holds all the number of lines which were unvalid.
-	private static boolean gotoError=false;
-	private static Set<Integer> labelSet=new HashSet<Integer>();
+	private static boolean errorInCode=false;//this variable assigned "true" if there was at least one mistake in the code.
+	private static boolean gotoError=false;//this variable get true if the current line we parsing has an goto command which points to non-existent label. This helps with adding the correct error code.
+	
+	public static List<Integer> codeOneErrors=new ArrayList<>();
+	public static List<Integer> codeThreeErrors=new ArrayList<>();
+	public static List<Integer> codeTwoErrors=new ArrayList<>();//this holds all the goto command which point to the future, so we will be able to check them later
+	
+	private static List<Integer[]> qlabels=new ArrayList<>();//all the goto label that may be in the future;
+	private static Set<Integer> labelSet=new HashSet<Integer>();//this set holds all the labels we saw till now in the parsing.
+	private static int qLabel;
 	
 	// Method parses the given program and returns a list of statements.
 	// If there is an error in this code, the function returns null.
@@ -19,19 +25,15 @@ public class Parser {
 		List<Statement> statementList=new ArrayList<Statement>();//This is the statement list- a representation of the program.
 		int currLabel = -1; //Variable to maintain last seen label, to ensure monotone growth.
 		int lineNumber=1;
-		boolean errorInCode=false;//this variable assigned "true" if there was at least one mistake in the code.
+		
 		Token curTokenParsing = TokenGenerator.currentToken; // fetch token reference from lexer.
 		
 		for (;curTokenParsing.getTokenType()!=TokenType.EOF;++lineNumber){
 			gotoError=false;
-			if(lineNumber!=1){
+			if(lineNumber!=1){//we cann't have an error in "0 line"(doesn't exist).
 				for(;curTokenParsing.getTokenType()!=TokenType.NEWLINE;TokenGenerator.advanceToNextToken());//advance from error to next line (if there was error)
 			}
-			if(TokenGenerator.advanceToNextToken()){//advance to the start of the next line
-				errorLines.add(lineNumber);
-				errorMassages.add(1);
-				return null;
-			}
+			TokenGenerator.advanceToNextToken();
 			if (curTokenParsing.getTokenType()==TokenType.EOF){
 				break;
 			}
@@ -39,55 +41,33 @@ public class Parser {
 			
 			//Check for label in the beginning of The line and set it.
 			if (curTokenParsing.getTokenType()!=TokenType.NUM){
-				errorInCode=true;
-				errorLines.add(lineNumber);
-				errorMassages.add(1);
+				addError(lineNumber,1);
 				continue;
 			}
 			if(currLabel >= Integer.parseInt(curTokenParsing.getRep())){
-				errorInCode=true;
-				errorLines.add(lineNumber);
-				errorMassages.add(3);
+				addError(lineNumber,3);
 				continue;
 			}
 			else{
 				currLabel=Integer.parseInt(curTokenParsing.getRep());
 				labelSet.add(currLabel);
 			}
-			if(TokenGenerator.advanceToNextToken()){//advance
-				errorLines.add(lineNumber);
-				errorMassages.add(1);
-				return null;
-			}
 			
+			TokenGenerator.advanceToNextToken();
 			if (curTokenParsing.getTokenType()!=TokenType.SPACE){
-				errorInCode=true;
-				errorLines.add(lineNumber);
-				errorMassages.add(1);
+				addError(lineNumber,1);
 				continue;
 			}
 			
-			if(TokenGenerator.advanceToNextToken()){//advance
-				errorLines.add(lineNumber);
-				errorMassages.add(1);
-				return null;
-			}
+			TokenGenerator.advanceToNextToken();
 			if (curTokenParsing.getTokenType()!=TokenType.COLON){
-				errorInCode=true;
-				errorLines.add(lineNumber);
-				errorMassages.add(1);
+				addError(lineNumber,1);
 				continue;
 			}
 			
-			if(TokenGenerator.advanceToNextToken()){//advance
-				errorLines.add(lineNumber);
-				errorMassages.add(1);
-				return null;
-			}
+			TokenGenerator.advanceToNextToken();
 			if (curTokenParsing.getTokenType()!=TokenType.SPACE){
-				errorInCode=true;
-				errorLines.add(lineNumber);
-				errorMassages.add(1);
+				addError(lineNumber,1);
 				continue;
 			}
 			
@@ -95,57 +75,36 @@ public class Parser {
 			TokenGenerator.advanceToNextToken();
 			ICommand lineCommands=parseCommand();
 			
+			
 			if (lineCommands==null){ // failed to parse
-				errorInCode=true;
-				errorLines.add(lineNumber);
-				if (gotoError){
-					errorMassages.add(3);
-				}
-				else{
-					errorMassages.add(1);
-				}
+				addError(lineNumber,1);
 				continue;
+			}
+			if (gotoError){//check for possible error in goto and add to qlabels(we will check it later);
+				qlabels.add(new Integer[]{lineNumber,qLabel});
 			}
 			
 			//check [SPACE][SEM-COL][NEWLINE][SPACE] (older)
 			// check [NEWLINE]
-			if(TokenGenerator.advanceToNextToken()){//advance
-				errorLines.add(lineNumber);
-				errorMassages.add(1);
-				return null;
-			}
+			TokenGenerator.advanceToNextToken();
 			if (curTokenParsing.getTokenType()!=TokenType.NEWLINE){
-				errorInCode=true;
-				errorLines.add(lineNumber);
-				errorMassages.add(1);
+				addError(lineNumber,1);
+				if (qlabels.get(qlabels.size()-1)[0]==lineNumber) {//if there is syntax error, no need to check label number
+					qlabels.remove(qlabels.size()-1);
+				}
 				continue;
 			}
-			/*TokenGenerator.advanceToNextToken();
-			if (curTokenParsing.getTokenType()!=TokenType.SPACE){
-				err = true;
-				break;
-			}
-			TokenGenerator.advanceToNextToken();
-			if (curTokenParsing.getTokenType()!=TokenType.SEMCOL){
-				err = true;
-				break;
-			}
-			TokenGenerator.advanceToNextToken();
-			if (curTokenParsing.getTokenType()!=TokenType.NEWLINE){
-				err = true;
-				break;
-			}
-			TokenGenerator.advanceToNextToken();
-			if (curTokenParsing.getTokenType()!=TokenType.SPACE){
-				err = true;
-				break;
-			}*/
 			
-			// otherwise, valid statement
+			// otherwise, valid statement( may have invalid goto,if there are we delete them later).
 			statementList.add(new Statement(currLabel,lineCommands));
 			
 		}
-		
+		if (checkGotoCommandLabels()){
+			errorInCode=true;
+			for (int i : codeTwoErrors){
+				statementList.remove(i-1);
+			}
+		}
 		if (errorInCode){
 			return null;
 		}
@@ -183,9 +142,7 @@ public class Parser {
 	private static Commands.ifCommand ifParsing(){
 		
 		Token curTokenParsing = TokenGenerator.currentToken; // fetch token reference from lexer
-		if(TokenGenerator.advanceToNextToken()){//advance
-			return null;
-		}                // advance to next token
+		TokenGenerator.advanceToNextToken(); // advance to next token
 		if (curTokenParsing.getTokenType()!=TokenType.LPAR){
 			return null;
 		}
@@ -257,7 +214,7 @@ public class Parser {
 		
 		if(!labelSet.contains(Integer.parseInt(curTokenParsing.getRep()))){
 			gotoError=true;
-			return null;
+			qLabel=Integer.parseInt(curTokenParsing.getRep());
 		}
 		return new Commands.gotoCommand(new Number(Integer.parseInt(curTokenParsing.getRep())));
 	}
@@ -369,6 +326,34 @@ public class Parser {
 		}
 		
 		return root;
+	}
+	
+	private static void addError(int line , int code){
+		switch(code){
+		case 1:
+			codeOneErrors.add(line);
+			break;
+		case 2:
+			codeTwoErrors.add(line);
+			break;
+		case 3:
+			codeThreeErrors.add(line);
+			break;
+		}
+		errorInCode=true;
+	}
+	
+	//Check for all the goto commands label that we didn't manage to verify before,does those label exist.
+	//if any error found,return true. else return false.
+	private static boolean checkGotoCommandLabels(){
+		boolean errorFound=false;
+		for (int i=0;i<qlabels.size();i++){
+			if(!labelSet.contains(qlabels.get(i)[1])){
+				errorFound=true;
+				addError(qlabels.get(i)[0],2);
+			}
+		}
+		return errorFound;
 	}
 	
 }
