@@ -117,8 +117,8 @@ public class TokenGenerator {
 					 *  take care of single character tokens (that are not prefixes to other valid tokens)
 					 *  including variables
 					 */
-					if(c == ' ' || /* c == '\n' || c == ';' ||*/  c == '0' || c == '+' || c == '-' || c == '*' || c == '\\'
-							|| c == '(' || c == ')' || Character.isAlphabetic(c))
+					if(c == ' ' ||  c == '0' || c == '+' || c == '-' || c == '*' || c == '\\'
+							|| c == '(' || c == ')' || (c >= 'a' && c <= 'z'))
 					{
 						TokenGenerator.updateTokenByRep(Character.toString(c));
 						return;

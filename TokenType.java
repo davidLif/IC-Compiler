@@ -49,7 +49,7 @@ public enum TokenType {
 			return NEWLINE;
 		
 		char c = rep.charAt(0);
-		if(Character.isAlphabetic(c))
+		if(c >= 'a' && c <= 'z')
 			return VAR;
 		if(Character.isDigit(c))
 			return NUM;
