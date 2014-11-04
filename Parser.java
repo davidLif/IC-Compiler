@@ -20,24 +20,7 @@ public class Parser {
 	private static Set<Integer> labelSet=new HashSet<Integer>();// this set holds all the labels we saw till now in the parsing.
 	private static int qLabel;                                  // if current command is a goto, this variable will hold the jump to label
 	
-	
-	/* method handles syntax error (code 1) 
-	 * adds the line to the proper lists, and removes from other lists if needed
-	 * the label, if was added, is also removed.
-	 * (if label was not added to labelSet, specifiy label as null )
-	 */
-	
-	private static void setSyntaxError(Integer line, Integer label)
-	{
-		/* add error code 1 */
-		addError(line, 1);
-		/* now, remove other errors, and remove label from set*/
-		if(codeTwoErrors.contains(line)) codeTwoErrors.remove(line);
-		if(codeThreeErrors.contains(line)) codeTwoErrors.remove(line);
-		if(label != null ) // label was set
-			labelSet.remove(label);
-	}
-	
+
 	// Method parses the given program and returns a list of statements.
 	// If there is an error [1-3] in the given code, the function returns null.
 	public static List<Statement> parseProgram()
