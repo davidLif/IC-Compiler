@@ -12,25 +12,6 @@ import java_cup.runtime.*;
 
 %{
 	
-	private StringBuffer stringBuilder = new StringBuffer(); // will hold string literals
-	private int string_line_start;                           // will hold the the beginning of the string location
-	private int string_column_start;
-	
-	/* return new token of type string */
-	private Token getStringToken( String value)
-	{
-		return new Token(sym.STRING_LITERAL, Token.STRING_TAG, value, string_line_start + 1, string_column_start + 1);
-	}
-	
-	private void resetString()
-	{
-		// reset buffer
-		this.stringBuilder.setLength(0);
-		// save beginning of the string location
-		this.string_line_start = yyline;
-		this.string_column_start = yycolumn;
-	}
-	
 	/* return new token of type id (with tag) */
 	private Token getToken(int id, String tag)
 	{
@@ -73,10 +54,9 @@ WhiteSpace = " " | "\t" | {LineSeperator}
    all the characters between 32 (space) up to 126(~) except double quote "(34) and \ (42)
 */
 StringChar = [ !#-Z] | "[" | "]" | "^" |[_-~]
+String = \" ({StringChar} | "\t" | "\n" | \\\" | \\\\ )* \"
 
 
-/* state for string parsing */
-%state STRING
 /* state for complex comment parsing */
 %state COMMENT
 
@@ -122,6 +102,12 @@ StringChar = [ !#-Z] | "[" | "]" | "^" |[_-~]
 							}
 							   
 						}
+						
+/* process string literal*/
+<YYINITIAL> {String}    {
+							return getToken(sym.STRING_LITERAL, Token.STRING_TAG);
+						}
+						
 /* punctuation */	
 <YYINITIAL> "("       { return getToken(sym.LP); }
 <YYINITIAL> ")"       { return getToken(sym.RP); }
@@ -150,11 +136,7 @@ StringChar = [ !#-Z] | "[" | "]" | "^" |[_-~]
 <YYINITIAL> "!"       { return getToken(sym.NOT); }
 <YYINITIAL> "="       { return getToken(sym.ASSIGN); }
 
-/* process string literal  */
-<YYINITIAL> \"       { 
-								this.resetString();  // reset buffer and location fields
-								yybegin(STRING);     // parse string
-					  }
+
 /* process comment (not inline) */
 <YYINITIAL> "/*"                 { yybegin(COMMENT); }
 
@@ -174,21 +156,6 @@ StringChar = [ !#-Z] | "[" | "]" | "^" |[_-~]
 								}
 }
 
-<STRING> {
-  \"                             { yybegin(YYINITIAL); 
-                                   return getStringToken(stringBuilder.toString());
-                                 }
-  {StringChar}+                  { stringBuilder.append(yytext()); }
-  \\t                            { stringBuilder.append("\t"); }
-  \\n                            { stringBuilder.append("\n"); }
-  \\\"                           { stringBuilder.append("\""); }
-  \\\\                           { stringBuilder.append("\\"); }
-  [^]                            { throw new LexicalError("String literal was not closed properly, line: " + (yyline+1) + " column: " + (yycolumn +1)); }
-  <<EOF>>                        {
-									// string was not closed
-									throw new LexicalError("String literal:" + stringBuilder.toString() 
-											+ "was not closed\n");
-								}
-}
+
 
 [^]                             { throw new LexicalError("Invalid char: "+ yytext() +" line:"+ (yyline+1) + " column: " + (yycolumn+1)); }
