@@ -14,8 +14,10 @@ public class Token extends Symbol{
 	private String tag;
 	
 	
+	
 	public int getId() { return super.sym; }
-	public Object getValue() { return this.value; }
+	public String getTag() { return this.tag; }
+	public String getValue() { return this.value; }
 	public int getLine() { return this.line; }
 	public int getColumn() { return this.column; }
 	
@@ -26,12 +28,9 @@ public class Token extends Symbol{
 		this.line = line;
 		this.column = column;
 		this.tag = tag;
+
 		
 	}
-	
-	public String toString()
-	{
-		return String.format("%s\t%s\tline: %s\tcolumn: %s\t\n", value, tag, line, column);
 
-	}
+
 }
