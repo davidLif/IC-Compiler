@@ -8,7 +8,6 @@ import java.util.Collection;
 import java.util.List;
 
 
-
 public class Main {
 
 	public static void main(String[] args) {
@@ -19,16 +18,18 @@ public class Main {
 				Collection<Token> result = generateTokens(txtFile);
 				if(result == null)
 					return;
+				
 				// we've received a valid result, print it
 				printTokens(result);
 				
 			} catch (FileNotFoundException e) {
 				
-				e.printStackTrace();
+				System.err.println(e.getMessage());
 			}
 	  
 	}
 	
+	/* this method prints the tokens in a table */
 	private static void printTokens(Collection<Token> result) {
 		
 		// print title
@@ -40,7 +41,6 @@ public class Main {
 		}
 	}
 
-	/* note to reader, this method is suppose to receive a String.. (?) */
 	
 	/* 
 	 * this method receives a file stream (FileReader) and returns
@@ -54,6 +54,7 @@ public class Main {
 		Token curr;
 		Lexer scanner = new Lexer(txtFile);
 		try {
+			// scan the tokens, until we reach EOF token
 			curr = scanner.next_token();
 		
 			while(curr.sym != sym.EOF){
@@ -61,13 +62,12 @@ public class Main {
 				curr = scanner.next_token();
 			}
 		
-		} catch (LexicalError e) {
-			// TODO CHANGE THIS PART
-			e.printStackTrace();
+		} catch (LexicalError err) {
+			// our exception was thrown
+			System.err.println(err.getMessage());
 			return null;
 		} catch (IOException e) {
-			// TODO Auto-generated catch block
-			e.printStackTrace();
+			System.err.println(e.getMessage());
 			return null;
 		}
 		

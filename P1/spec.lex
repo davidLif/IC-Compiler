@@ -34,7 +34,7 @@ import java_cup.runtime.*;
 
 /* define Integer literal */
 PosInt = [1-9][0-9]*
-Integer = [-]?({PosInt} | 0)
+Integer = ({PosInt} | 0)
 
 /* define identifiers */
 Letter_  = [a-zA-Z_]
@@ -57,7 +57,7 @@ StringChar = [ !#-Z] | "[" | "]" | "^" |[_-~]
 String = \" ({StringChar} | "\t" | "\n" | \\\" | \\\\ )* \"
 
 
-/* state for complex comment parsing */
+/* state for comment (not inline) parsing */
 %state COMMENT
 
 %eofval{
@@ -94,11 +94,12 @@ String = \" ({StringChar} | "\t" | "\n" | \\\" | \\\\ )* \"
 <YYINITIAL> {Integer}  {   
 							try {
 									// try to parse the number to Integer (signed int has the same range as IC spec)
+									// TODO: READ FORUM TO FIND OUT WHAT TO DO, this wont work for 2^31 (it should if the number was originally negative)
 									Integer.parseInt(yytext());
 									return getToken(sym.INTEGER, Token.INTEGER_TAG);  
 									
 							} catch (NumberFormatException e) {
-								throw new LexicalError("Error: number " + yytext() +" is not an Integer\n");
+								throw new LexicalError("Error: number " + yytext() +" is not an Integer");
 							}
 							   
 						}
@@ -152,7 +153,7 @@ String = \" ({StringChar} | "\t" | "\n" | \\\" | \\\\ )* \"
 									yybegin(YYINITIAL);  } 
 	[^]							{   /* ignore  */  }
 	<<EOF>>                     {   /* comment was not closed */
-									throw new LexicalError("Comment was not closed!\n");
+									throw new LexicalError("Comment was not closed, line: " + (yyline+1) +", column:" + (yycolumn+1));
 								}
 }
 

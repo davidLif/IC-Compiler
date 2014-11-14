@@ -30,8 +30,7 @@ public class sym {
 	public static final int INTEGER = 22;          // Integer literal
 	public static final int STRING_LITERAL = 23;   // string  literal
 	
-	/* punctuation */
-	
+	/* punctuation marks*/
 	
 	public static final int LP = 24;        // (
 	public static final int RP = 25;        // )
