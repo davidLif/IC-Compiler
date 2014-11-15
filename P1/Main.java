@@ -12,6 +12,11 @@ public class Main {
 
 	public static void main(String[] args) {
 	   
+		if(args.length == 0)
+		{
+			System.err.println("Error: no input was given");
+			return;
+		}
 	    
 	        try {
 				FileReader txtFile = new FileReader(args[0]);
