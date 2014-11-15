@@ -48,13 +48,13 @@ LineSeperator = \n | \r | \r\n
 InlineComment = "//" {ContentChar}* {LineSeperator}?
 
 /* define white spaces */
-WhiteSpace = " " | "\t" | {LineSeperator}
+WhiteSpace = [ \t] | {LineSeperator}
 
 /* define all the characters that can appear in a string
    all the characters between 32 (space) up to 126(~) except double quote "(34) and \ (42)
 */
 StringChar = [ !#-Z] | "[" | "]" | "^" |[_-~]
-String = \" ({StringChar} | "\t" | "\n" | \\\" | \\\\ )* \"
+String = \" ({StringChar} | "\\"n | "\\"t | \\\" | \\\\ )* \"
 
 
 /* state for comment (not inline) parsing */
