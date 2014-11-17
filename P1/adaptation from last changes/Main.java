@@ -109,7 +109,14 @@ public class Main {
 	}
 	
 	public static void PrintTokenError(String token, int line, int column){
-		System.err.println("Error!\t"+token+"\t"+"\t"+line+":"+column);
+		if (line == -1 && column == -1){
+			//this error was invoked by the lexer because he couldn't read some characther in the input.
+			//this error is created automaticly by JFlex and doesn't resice line or column.
+			System.err.println("Reading error!\t"+token);
+		}
+		else{
+			System.err.println("Error!\t"+token+"\t"+"\t"+line+":"+column);
+		}
 	}
 	public static void PrintHeader()
 	{

@@ -11,8 +11,11 @@ import java_cup.runtime.*;
 %scanerror LexicalError
 
 %{
-	
-	
+	/*
+		thous variables saves the line and column of the comment start, so we will be able to give them in case of a error.
+	*/
+	int commentCol;
+	int commentRow;
 	/* 
 		return new token of type/tag id 
 		the matched value will be fetched using yytext()
@@ -27,6 +30,11 @@ import java_cup.runtime.*;
 	private LexicalError getLexicalErr()
 	{
 		return new LexicalError(yytext(), yyline+1, yycolumn + 1);
+	}
+	
+	private LexicalError getLexicalErrComment()
+	{
+		return new LexicalError(yytext(), commentRow, commentCol);
 	}
 	
 
@@ -143,7 +151,9 @@ String = \" ({StringChar} | "\\"n | "\\"t | \\\" | \\\\ )* \"
 
 
 /* process comment (not inline) */
-<YYINITIAL> "/*"                 { yybegin(COMMENT); }
+<YYINITIAL> "/*"                 { commentCol=yycolumn + 1;
+									commentRow=yyline + 1;
+									yybegin(COMMENT); }
 
 /* process inline comment */
 <YYINITIAL> {InlineComment}      { /* skip */}
@@ -157,7 +167,7 @@ String = \" ({StringChar} | "\\"n | "\\"t | \\\" | \\\\ )* \"
 									yybegin(YYINITIAL);  } 
 	[^]							{   /* ignore  */  }
 	<<EOF>>                     {   /* comment was not closed */
-									throw getLexicalErr();
+									throw getLexicalErrComment();
 								}
 }
 
