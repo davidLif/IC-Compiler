@@ -10,6 +10,8 @@ import java.util.List;
 
 public class Main {
 
+	static LexicalError errorInfo=null;
+
 	public static void main(String[] args) {
 	   
 		if(args.length == 0)
@@ -65,6 +67,10 @@ public class Main {
 			
 			PrintToken(tk.getValue(), token_tag, tk.getLine(), tk.getColumn());
 		}
+		
+		if (errorInfo != null) {
+			PrintTokenError(errorInfo.getValue(), errorInfo.getLine(), errorInfo.getColumn());
+		}
 	}
 
 	
@@ -91,8 +97,8 @@ public class Main {
 		} catch (LexicalError err) {
 			// our exception was thrown
 			
-			PrintTokenError(err.getValue(), err.getLine(), err.getColumn());
-			return null;
+			errorInfo=err;
+			return tokenList;
 			
 		} catch (IOException e) {
 			
