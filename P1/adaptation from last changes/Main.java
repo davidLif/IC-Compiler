@@ -10,7 +10,7 @@ import java.util.List;
 
 public class Main {
 
-	static LexicalError errorInfo=null;
+	static String errorMsg=null;
 
 	public static void main(String[] args) {
 	   
@@ -68,8 +68,8 @@ public class Main {
 			PrintToken(tk.getValue(), token_tag, tk.getLine(), tk.getColumn());
 		}
 		
-		if (errorInfo != null) {
-			PrintTokenError(errorInfo.getValue(), errorInfo.getLine(), errorInfo.getColumn());
+		if (errorMsg != null) {
+			PrintTokenError(errorMsg);
 		}
 	}
 
@@ -97,13 +97,13 @@ public class Main {
 		} catch (LexicalError err) {
 			// our exception was thrown
 			
-			errorInfo=err;
+			errorMsg=err.getMessage();
 			return tokenList;
 			
 		} catch (IOException e) {
 			
-			System.err.println(e.getMessage());
-			return null;
+			errorMsg=e.getMessage();
+			return tokenList;
 		}
 		
 		return tokenList;
@@ -114,15 +114,8 @@ public class Main {
 		System.out.println(token + "\t" + tag + "\t" + line + ":" + column);
 	}
 	
-	public static void PrintTokenError(String token, int line, int column){
-		if (line == -1 && column == -1){
-			//this error was invoked by the lexer because he couldn't read some characther in the input.
-			//this error is created automaticly by JFlex and doesn't resice line or column.
-			System.err.println("Reading error!\t"+token);
-		}
-		else{
-			System.err.println("Error!\t"+token+"\t"+"\t"+line+":"+column);
-		}
+	public static void PrintTokenError(String errorMsg){
+		System.err.println("Error!\t"+errorMsg);
 	}
 	public static void PrintHeader()
 	{

@@ -316,11 +316,6 @@ public class Lexer implements java_cup.runtime.Scanner {
   private int zzFinalHighSurrogate = 0;
 
   /* user code: */
-	/*
-		thous variables saves the line and column of the comment start, so we will be able to give them in case of a error.
-	*/
-	int commentCol;
-	int commentRow;
 	/* 
 		return new token of type/tag id 
 		the matched value will be fetched using yytext()
@@ -331,18 +326,6 @@ public class Lexer implements java_cup.runtime.Scanner {
 		return new Token(tag, value, yyline + 1, yycolumn + 1);
 		
 	}
-	
-	private LexicalError getLexicalErr()
-	{
-		return new LexicalError(yytext(), yyline+1, yycolumn + 1);
-	}
-	
-	private LexicalError getLexicalErrComment()
-	{
-		return new LexicalError(yytext(), commentRow, commentCol);
-	}
-	
-
 
 
   /**
@@ -722,7 +705,7 @@ public class Lexer implements java_cup.runtime.Scanner {
 
       switch (zzAction < 0 ? zzAction : ZZ_ACTION[zzAction]) {
         case 1: 
-          { throw getLexicalErr();
+          { throw new LexicalError(String.format("Invalid char: %s, at line: %d, col: %d", yytext(), yyline+1, yycolumn+1));
           }
         case 53: break;
         case 2: 
@@ -735,7 +718,7 @@ public class Lexer implements java_cup.runtime.Scanner {
 							} catch (NumberFormatException e) {
 							
 								// we know for sure that this numeric expression cannot be an integer (not even a negative one)
-								throw getLexicalErr();
+								throw new LexicalError(String.format("numberic value is not an Integer: %s", yytext()));
 
 							}
           }
@@ -829,9 +812,7 @@ public class Lexer implements java_cup.runtime.Scanner {
           }
         case 76: break;
         case 25: 
-          { commentCol=yycolumn + 1;
-									commentRow=yyline + 1;
-									yybegin(COMMENT);
+          { yybegin(COMMENT);
           }
         case 77: break;
         case 26: 
@@ -950,7 +931,7 @@ public class Lexer implements java_cup.runtime.Scanner {
             switch (zzLexicalState) {
             case COMMENT: {
               /* comment was not closed */
-									throw getLexicalErrComment();
+									throw new LexicalError(String.format("Comment was not closed, at line: %d, col: %d", yyline+1, yycolumn+1));
             }
             case 131: break;
             default:
