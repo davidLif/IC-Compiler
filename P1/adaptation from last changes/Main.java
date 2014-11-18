@@ -7,10 +7,17 @@ import java.util.ArrayList;
 import java.util.Collection;
 import java.util.List;
 
+/**
+ * @team pooyae <pooyae@mail.tau.ac.il>
+ *  Team member 206107740
+ *  Team member 320882988
+ *  Team member 305686297
+ *
+ */
 
 public class Main {
 
-	static String errorMsg=null;
+	static String errorMsg = null;
 
 	public static void main(String[] args) {
 	   
@@ -40,7 +47,6 @@ public class Main {
 	private static void printTokens(Collection<Token> result) {
 		
 		// print title
-		//System.out.println("token\ttag\tline : column");
 		PrintHeader();
 		
 		for(Token tk : result)
@@ -119,7 +125,8 @@ public class Main {
 	}
 	public static void PrintHeader()
 	{
-		System.out.println("token\ttag\tline:column");
+		System.out.println("token\ttag\tline :column");
+	
 	}
 	
 	

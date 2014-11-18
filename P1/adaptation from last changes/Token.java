@@ -14,7 +14,6 @@ public class Token extends Symbol{
 	private int tag;
 	
 	
-	
 	public int getId() { return super.sym; }
 	public int getTag() { return this.tag; }
 	public String getValue() { return this.value; }

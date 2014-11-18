@@ -10,6 +10,13 @@ import java_cup.runtime.*;
 %function next_token
 %scanerror LexicalError
 
+
+/* 
+	----	NOTE:    
+	a numberic value that is bigger than 2^31 will result in a lexical error (cannot be an Integer)
+	
+*/
+
 %{
 	/* 
 		return new token of type/tag id 
@@ -20,6 +27,23 @@ import java_cup.runtime.*;
 		String value = yytext();
 		return new Token(tag, value, yyline + 1, yycolumn + 1);
 		
+	}
+	
+	/* 
+		return new token of type/tag id, with given line and column values
+		the matched value will be fetched using yytext()
+	*/
+	private Token getToken(int tag, int line, int column)
+	{
+		String value = yytext();
+		return new Token(tag, value, line, column);
+		
+	}
+	
+	/* error message to print on lexical error */
+	private String getErrorMessage()
+	{
+		return String.format("%d: Lexical error: %s", yyline + 1, yytext());
 	}
 %}
 
@@ -93,7 +117,7 @@ String = \" ({StringChar} | "\\"n | "\\"t | \\\" | \\\\ )* \"
 							} catch (NumberFormatException e) {
 							
 								// we know for sure that this numeric expression cannot be an integer (not even a negative one)
-								throw new LexicalError(String.format("numberic value is not an Integer: %s", yytext()));
+								throw new LexicalError(getErrorMessage());
 
 							}
 							   
@@ -101,7 +125,9 @@ String = \" ({StringChar} | "\\"n | "\\"t | \\\" | \\\\ )* \"
 						
 /* process string literal*/
 <YYINITIAL> {String}    {
-							return getToken(sym.STRING_LITERAL);
+							String val = yytext();
+							// fetch token, but set column index as the column of last " 
+							return getToken(sym.STRING_LITERAL, yyline + 1, (yycolumn + 1) + val.length() - 1);
 						}
 						
 /* punctuation */	
@@ -123,7 +149,7 @@ String = \" ({StringChar} | "\\"n | "\\"t | \\\" | \\\\ )* \"
 <YYINITIAL> "%"       { return getToken(sym.MOD); }
 <YYINITIAL> "<"       { return getToken(sym.LESSTHAN); }
 <YYINITIAL> "<="       { return getToken(sym.LESSTHANEQ); }
-<YYINITIAL> ">"       { return getToken(sym.GREATERTHAN); }
+<YYINITIAL> ">"        { return getToken(sym.GREATERTHAN); }
 <YYINITIAL> ">="       { return getToken(sym.GREATERTHANEQ); }
 <YYINITIAL> "=="       { return getToken(sym.EQ); }
 <YYINITIAL> "!="       { return getToken(sym.NOTEQ); }
@@ -149,10 +175,10 @@ String = \" ({StringChar} | "\\"n | "\\"t | \\\" | \\\\ )* \"
 									yybegin(YYINITIAL);  } 
 	[^]							{   /* ignore  */  }
 	<<EOF>>                     {   /* comment was not closed */
-									throw new LexicalError(String.format("Comment was not closed, at line: %d, col: %d", yyline+1, yycolumn+1));
+									throw new LexicalError(getErrorMessage());
 								}
 }
 
 
 
-[^]                             { throw new LexicalError(String.format("Invalid char: %s, at line: %d, col: %d", yytext(), yyline+1, yycolumn+1)); }
+[^]                             { throw new LexicalError(getErrorMessage()); }
