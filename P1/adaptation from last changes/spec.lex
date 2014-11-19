@@ -29,17 +29,6 @@ import java_cup.runtime.*;
 		
 	}
 	
-	/* 
-		return new token of type/tag id, with given line and column values
-		the matched value will be fetched using yytext()
-	*/
-	private Token getToken(int tag, int line, int column)
-	{
-		String value = yytext();
-		return new Token(tag, value, line, column);
-		
-	}
-	
 	/* error message to print on lexical error */
 	private String getErrorMessage()
 	{
@@ -125,9 +114,8 @@ String = \" ({StringChar} | "\\"n | "\\"t | \\\" | \\\\ )* \"
 						
 /* process string literal*/
 <YYINITIAL> {String}    {
-							String val = yytext();
 							// fetch token, but set column index as the column of last " 
-							return getToken(sym.STRING_LITERAL, yyline + 1, (yycolumn + 1) + val.length() - 1);
+							return getToken(sym.STRING_LITERAL);
 						}
 						
 /* punctuation */	
