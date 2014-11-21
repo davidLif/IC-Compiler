@@ -114,7 +114,7 @@ String = \" ({StringChar} | "\\"n | "\\"t | \\\" | \\\\ )* \"
 						
 /* process string literal*/
 <YYINITIAL> {String}    {
-							// fetch token, but set column index as the column of last " 
+							
 							return getToken(sym.STRING_LITERAL);
 						}
 						
