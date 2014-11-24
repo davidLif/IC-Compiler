@@ -118,7 +118,7 @@ stmt ::= location : loc EQ expression:exp SEMCOL
 	{: return  new Assignment( id , exp :}
 
 stmt_star ::= stmt_list:lst
-	{: RESULT = new Program(lst); :}
+	{: RESULT = new StatementsBlock(getLine(),lst); :}
 	
 stmt_list ::= stmt :s
 {: RESULT = new ArrayList<Statement>();
