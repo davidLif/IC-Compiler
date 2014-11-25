@@ -1,33 +1,10 @@
 package IC.Parser;
 
-import IC.Compiler;
 import IC.AST.*;
 import java.util.ArrayList;
 import java.util.List;
+import IC.LiteralTypes;
 import IC.DataTypes;
-import java_cup.runtime.Symbol;
-
-
-parser code {:
-
-	private SyntaxError err;
-
-	public void syntax_error(Symbol cur_token) {
-
-		//System.out.println("should be: " + expected_token_ids().size());
-		//System.out.println("should be: " + expected_token_ids().size());
-		List<Integer> lst_tokens = expected_token_ids();
-		//System.out.println(" really is " + lst_tokens.size());
-		//System.out.println("should be: " + expected_token_ids().size());
-		err =  new SyntaxError((Token)cur_token, lst_tokens);
-	}
-	
-	public void unrecovered_syntax_error(Symbol cur_token) throws SyntaxError
-	{
-		throw err;
-	}
-
-:}
 
 ////////////////////////////////////////////
 // Symbol list (terminals and non-terminals)
@@ -47,7 +24,6 @@ terminal LP, RP, CRP, CLP, SQUARERB, SQUARELB, DOT, SEMCOL, COMMA;
 /* operators */
 terminal ADD, MINUS, MULT, DIV, MOD, LESSTHAN, LESSTHANEQ, GREATERTHAN, GREATERTHANEQ, EQ;
 terminal NOTEQ, AND, OR, NOT, ASSIGN;
-
 
 nonterminal Program program;
 nonterminal List<ICClass> class_list;
@@ -73,8 +49,32 @@ nonterminal Statement statement;
 nonterminal List<Statement> stmt_list_opt;
 
 
-// epsilon
+nonterminal Call call;
+nonterminal VirtualCall virtual_call;
+nonterminal StaticCall static_call;
+nonterminal Expression exp;
+nonterminal Location location;
+nonterminal ArrayLocation array_location;
+nonterminal VariableLocation variable_location;
+nonterminal Expression exp_and_dot_op;
+nonterminal List<Expression> exp_list;
+nonterminal Test_start;
 nonterminal empty;
+nonterminal List<Expression> exp_list_op;
+
+
+
+nonterminal stmt;
+nonterminal expr;
+
+nonterminal binop;
+nonterminal unop;
+nonterminal literal;
+nonterminal stmt_star;
+nonterminal stmt_lst;
+
+
+
 
 //////////////////////////
 // Precedence declarations
@@ -82,6 +82,57 @@ nonterminal empty;
 //////////////
 // The grammar
 
+Test_start ::= program {: :};
+
+call ::= virtual_call:c {: RESULT =c; :}
+		| static_call:c {: RESULT =c; :}
+		;
+
+static_call ::= CLASSID:class_id DOT ID:id LP exp_list_op:lst RP 
+			{: RESULT = new StaticCall(1,class_id,id,lst); :}
+			;
+			
+virtual_call ::= exp:e DOT ID:id LP exp_list_op:lst RP 
+			{: RESULT = new VirtualCall(1,e,id,lst);:}
+			| ID:id LP exp_list_op:lst RP 
+			{: RESULT = new VirtualCall(1,new Literal(-1,LiteralTypes.STRING),id,lst);:}
+			;
+
+empty ::=	{: :};		
+			
+exp_list_op ::= exp_list:lst {: :} | empty {: RESULT = new ArrayList<Expression>(); :};
+
+exp_list ::= exp:e 
+			{:  List<Expression> lst = new ArrayList<Expression>();
+				lst.add(e);
+				RESULT = lst; :}
+			| exp_list:lst exp:e 
+			{:  lst.add(e);
+				RESULT = lst; :}
+			;
+
+
+location ::= variable_location:loc {: RESULT =loc; :}
+			| array_location:loc {: RESULT =loc; :}
+			;
+			
+variable_location ::= ID:id {: RESULT = new VariableLocation(1,id); :}
+					| exp:e DOT ID:id {: RESULT = new VariableLocation(1,e,id); :}
+					;
+
+array_location ::= exp:out_exp SQUARELB exp:in_exp SQUARERB
+				{: RESULT = new ArrayLocation(out_exp,in_exp); :}
+				;
+			
+/*FOR TESTING ONLY*/
+exp ::= INTEGER {: RESULT = new Literal(1,LiteralTypes.STRING); :}
+	;
+	
+	
+	
+	
+	
+	
 program ::= class_list:lst
 	{: RESULT = new Program(lst); :}
 	| empty
@@ -122,15 +173,6 @@ icclass ::= CLASS CLASSID:name extends_opt:superclass CLP fields_methods_list:ls
 		else
 			RESULT = new ICClass(-1, name, superclass, fields, methods);
 	:}
-	// | error:e
-	// {:
-		// List<Integer> expected = (List<Integer>)expected_token_ids();
-		// System.out.println("Expected tokens: ");
-		// for(Integer i : expected)
-		// {
-			// System.out.println(SyntaxError.getSymString(i));
-		// }
-	// :}
 	;
 
 /* a list for both methods and fields */
@@ -258,7 +300,6 @@ method ::= STATIC return_type:t ID:name LP formal_list_opt:formals RP CLP stmt_l
 		RESULT = new StaticMethod(t, name, formals, new ArrayList<Statement>());
 		
 	:}
-
 ;
 
 formal ::= type:t ID:name
@@ -273,7 +314,7 @@ comma_formal_list ::= COMMA formal:f
 	;
 
 /* represents formal list (non empty) */
-formal_list ::= formal:f comma_formal_list:lst
+formal_list ::= formal: f comma_formal_list:lst
 	{: RESULT = new ArrayList<Formal>();
 	   RESULT.add(f);
 	   for(Formal formal : lst)
@@ -292,26 +333,112 @@ formal_list_opt ::= formal_list:lst
 	{: RESULT = new ArrayList<Formal>(); :}
 	;
 
-/* statement list, non empty */
-stmt_list ::= statement:stmt
-	{: RESULT = new ArrayList<Statement>(); RESULT.add(stmt); :}
-	| stmt_list:lst statement:stmt
-	{: lst.add(stmt); RESULT = lst; :}
-	
-	;
 
-stmt_list_opt ::= empty
-	{: RESULT = new ArrayList<Statement>(); :}
-	| stmt_list:lst
-	{: RESULT = lst; :}
+
+binop ::= 	ADD
+{: RESULT = BinaryOps.PLUS; :}
+|  MINUS
+{: RESULT = BinaryOps.MINUS; :}
+|   MULT
+{: RESULT = BinaryOps.MULTIPLY; :}
+|   DIV
+{: RESULT = BinaryOps.DIVIDE; :}
+|   MOD
+{: RESULT = BinaryOps.MOD; :}
+|   LESSTHAN
+{: RESULT = BinaryOps.LT; :}
+|   LESSTHANEQ
+{: RESULT = BinaryOps.LTE; :}
+|  GREATERTHAN
+{: RESULT = BinaryOps.GT; :}
+|   GREATERTHANEQ
+{: RESULT = BinaryOps.GTE; :}
+|  EQ
+{: RESULT = BinaryOps.EQUAL; :}
+|  NOTEQ
+{: RESULT = BinaryOps.NEQUAL; :}
+;
+
+unop ::=   MINUS
+{: RESULT = UnaryOps.UMINUS; :}  
+|  NOT  
+{: RESULT = UnaryOps.LNEG; :}  
+;
+
+literal ::=  INTEGER
+{: RESULT = LiteralType.INTEGER; :}
+| STRING
+{: RESULT = LiteralType.STRING; :}
+| FALSE
+{: RESULT = LiteralType.FALSE; :}
+| NULL
+{: RESULT = LiteralType.NULL; :}
+| TRUE
+{: RESULT = LiteralType.TRUE; :}
+;
+
+		
+
+	
+	
+expr ::= location : loc
+	{: RESULT = loc; :}
+		| call: call_exp
+	{: RESULT = call_exp; :}
+		| THIS
+	{: RESULT = new This(getLine()); :}
+	   |  CLASSID:class_name LP RP
+	{: RESULT = new NewClass(getLine(), class_name); :}
+	   | type:type_type SQUARELB expr:exp  SQUARERB
+	{: RESULT = new NewArray(type_type, exp); :}
+	   |  expr:exp DOT  LENGTH
+	{: RESULT = loc; :}
+        |    expr:exp_1 binop:binop_op  expr:exp_2
+	{: RESULT = new BinaryOp(exp_1, binop_op, exp_2);  :}
+		| unop:unop_op expr:exp
+	{: RESULT = 	new UnaryOp(unop_op, exp); :} 
+		| literal: l
+	{: return l; :}
+		|  LP expr:exp RP
+	{: return new ExpressionBlock(exp); :}
 	;
 	
-statement ::= BREAK
-	{:
-		RESULT = new Break(-1);
-	:}
+	
+	
+	
+stmt ::= location : loc EQ expr:exp SEMCOL
+	{: RESULT = NEW Assignment(loc, exp); :}
+		| call: call_exp SEMCOL
+	{: RESULT = new CallStatement(call_exp); :}
+		| RETURN  expr:exp  SEMCOL
+	{: RESULT = new Return(getLine(), exp); :}
+	   | IF LP expr:exp RP stmt: st1  ELSE stmt:st2 
+	{: RESULT = new If(exp, st1, st2); :}
+	   | WHILE LP expr:exp RP stmt:st
+	{: RESULT = new While(exp , st ); :}
+	   |  BREAK SEMCOL
+	{: RESULT = new Break(getLine()) :}
+	   |   CONTINUE SEMCOL
+	{: RESULT =  new Continue(getLIne());  :}
+		| SQUARELB stmt:st SQUARERB SEMCOL  // FIXXXXXXX
+	{: RESULT =new UnaryOp(unop_op, exp); :} 
+			| SQUARELB stmt_star: st  SQUARERB SEMCOL  
+	{: RESULT = new StatementsBlock(getLine(), st); :} 
+		|  type: t ID: id EQ expr:exp SEMCOL
+	{: return  new Assignment( id , exp :}
 	;
+	
+stmt_star ::= stmt_lst:lst
+	{: RESULT = new StatementsBlock(getLine(),lst); :}	
+;
+stmt_lst ::= stmt :s
+{: RESULT = new ArrayList<Statement>();
+   RESULT.add(s);
+:}
+|   stmt_lst: st_lst stmt:s
+{: st_lst.add(s);
+   RESULT = st_list; :}
+| empty
+{: RESULT = null; :}
+;
 
-empty ::=
-	{: :}
-	;
