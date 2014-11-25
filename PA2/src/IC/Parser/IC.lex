@@ -98,8 +98,8 @@ String = \" ({StringChar} | "\\"n | "\\"t | \\\" | \\\\ )* \"
 <YYINITIAL> "string"   { return getToken(sym.STRING); }
 
 /* process identifies */
-<YYINITIAL> {ClassID}  {   return getToken(sym.CLASSID); }
-<YYINITIAL> {OtherID}  {   return getToken(sym.ID);         }
+<YYINITIAL> {ClassID}  {   return getToken(sym.CLASSID, yytext()); }
+<YYINITIAL> {OtherID}  {   return getToken(sym.ID, yytext());         }
 
 /* process integers */
 <YYINITIAL> {Integer}  {   
