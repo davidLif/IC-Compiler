@@ -1,0 +1,97 @@
+package IC.Parser;
+
+import IC.AST.*;
+import java.util.ArrayList;
+import java.util.List;
+import IC.LiteralTypes;
+
+////////////////////////////////////////////
+// Symbol list (terminals and non-terminals)
+
+/* ids */
+terminal String ID;
+terminal String CLASSID;
+/* keywords */
+terminal EXTENDS, STATIC, VOID, INT, BOOL, STRING, RETURN, IF, ELSE, WHILE, BREAK, CONTINUE;
+terminal THIS, NEW, LENGTH, CLASS;
+/* literals */
+terminal Integer INTEGER;
+terminal String STRING_LITERAL;
+terminal FALSE, NULL, TRUE;
+/* punctuation */
+terminal LP, RP, CRP, CLP, SQUARERB, SQUARELB, DOT, SEMCOL, COMMA;
+/* operators */
+terminal ADD, MINUS, MULT, DIV, MOD, LESSTHAN, LESSTHANEQ, GREATERTHAN, GREATERTHANEQ, EQ;
+terminal NOTEQ, AND, OR, NOT, ASSIGN;
+
+/* --not right now--
+nonterminal Program Program;
+nonterminal Literal;
+nonterminal String extends_opt;
+*/
+
+nonterminal Call call;
+nonterminal VirtualCall virtual_call;
+nonterminal StaticCall static_call;
+nonterminal Expression exp;
+nonterminal Location location;
+nonterminal ArrayLocation array_location;
+nonterminal VariableLocation variable_location;
+nonterminal Expression exp_and_dot_op;
+nonterminal List<Expression> exp_list;
+nonterminal Test_start;
+nonterminal empty;
+nonterminal List<Expression> exp_list_op;
+
+//////////////////////////
+// Precedence declarations
+
+//////////////
+// The grammar
+
+Test_start ::= call {: :};
+
+call ::= virtual_call:c {: RESULT =c; :}
+		| static_call:c {: RESULT =c; :}
+		;
+
+static_call ::= CLASSID:class_id DOT ID:id LP exp_list_op:lst RP 
+			{: RESULT = new StaticCall(1,class_id,id,lst); :}
+			;
+			
+virtual_call ::= exp_and_dot_op:exp_dot ID:id LP exp_list_op:lst RP 
+			{: RESULT = new VirtualCall(1,exp_dot,id,lst);:}
+			;
+
+empty ::=	{: :};		
+			
+exp_list_op ::= exp_list:lst {: :} | empty {: RESULT = new ArrayList<Expression>(); :};
+
+exp_list ::= exp:e 
+			{:  List<Expression> lst = new ArrayList<Expression>();
+				lst.add(e);
+				RESULT = lst; :}
+			| exp_list:lst exp:e 
+			{:  lst.add(e);
+				RESULT = lst; :}
+			;
+			
+exp_and_dot_op ::= exp:e DOT {: RESULT =e;:}
+				| empty {: RESULT = new Literal(-1,LiteralTypes.STRING); :} //empty Expression
+				;
+
+location ::= variable_location:loc {: RESULT =loc; :}
+			| array_location:loc {: RESULT =loc; :}
+			;
+			
+variable_location ::= ID:id {: RESULT = new VariableLocation(1,id); :}
+					| exp:e DOT ID:id {: RESULT = new VariableLocation(1,e,id); :}
+					;
+
+array_location ::= exp:out_exp SQUARELB exp:in_exp SQUARERB
+				{: RESULT = new ArrayLocation(out_exp,in_exp); :}
+				;
+			
+/*FOR TESTING ONLY*/
+exp ::= INTEGER {: RESULT = new Literal(1,LiteralTypes.STRING); :}
+	;
