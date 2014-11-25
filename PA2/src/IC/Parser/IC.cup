@@ -1,17 +1,32 @@
 package IC.Parser;
 
+import IC.Compiler;
 import IC.AST.*;
 import java.util.ArrayList;
 import java.util.List;
 import IC.DataTypes;
-
+import java_cup.runtime.Symbol;
 
 
 parser code {:
-public void syntax_error(Symbol s) {
-		Token tok = (Token) s;
-		System.out.println("Line " + tok.getLine()+ ": Syntax error; unexpected " + tok);
+
+	private SyntaxError err;
+
+	public void syntax_error(Symbol cur_token) {
+
+		//System.out.println("should be: " + expected_token_ids().size());
+		//System.out.println("should be: " + expected_token_ids().size());
+		List<Integer> lst_tokens = expected_token_ids();
+		//System.out.println(" really is " + lst_tokens.size());
+		//System.out.println("should be: " + expected_token_ids().size());
+		err =  new SyntaxError((Token)cur_token, lst_tokens);
 	}
+	
+	public void unrecovered_syntax_error(Symbol cur_token) throws SyntaxError
+	{
+		throw err;
+	}
+
 :}
 
 ////////////////////////////////////////////
@@ -107,6 +122,15 @@ icclass ::= CLASS CLASSID:name extends_opt:superclass CLP fields_methods_list:ls
 		else
 			RESULT = new ICClass(-1, name, superclass, fields, methods);
 	:}
+	// | error:e
+	// {:
+		// List<Integer> expected = (List<Integer>)expected_token_ids();
+		// System.out.println("Expected tokens: ");
+		// for(Integer i : expected)
+		// {
+			// System.out.println(SyntaxError.getSymString(i));
+		// }
+	// :}
 	;
 
 /* a list for both methods and fields */
@@ -234,6 +258,7 @@ method ::= STATIC return_type:t ID:name LP formal_list_opt:formals RP CLP stmt_l
 		RESULT = new StaticMethod(t, name, formals, new ArrayList<Statement>());
 		
 	:}
+
 ;
 
 formal ::= type:t ID:name

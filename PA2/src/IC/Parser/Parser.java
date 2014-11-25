@@ -5,6 +5,7 @@
 
 package IC.Parser;
 
+import IC.Compiler;
 import IC.AST.*;
 import java.util.ArrayList;
 import java.util.List;
@@ -188,10 +189,24 @@ public class parser extends java_cup.runtime.lr_parser {
 
 
 
-public void syntax_error(Symbol s) {
-		Token tok = (Token) s;
-		System.out.println("Line " + tok.getLine()+ ": Syntax error; unexpected " + tok);
+
+	private SyntaxError err;
+
+	public void syntax_error(Symbol cur_token) {
+
+		//System.out.println("should be: " + expected_token_ids().size());
+		//System.out.println("should be: " + expected_token_ids().size());
+		List<Integer> lst_tokens = expected_token_ids();
+		//System.out.println(" really is " + lst_tokens.size());
+		//System.out.println("should be: " + expected_token_ids().size());
+		err =  new SyntaxError((Token)cur_token, lst_tokens);
 	}
+	
+	public void unrecovered_syntax_error(Symbol cur_token) throws SyntaxError
+	{
+		throw err;
+	}
+
 
 
 /** Cup generated class to encapsulate user supplied action code.*/

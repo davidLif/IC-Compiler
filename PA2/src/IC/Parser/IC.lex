@@ -32,10 +32,11 @@ import java_cup.runtime.*;
 		return new Token(id, null, yyline + 1, yycolumn + 1);
 	}
 	
-	/* error message to print on lexical error */
-	private String getErrorMessage()
+	
+	/* this method builds a new lexical error object */
+	private LexicalError getLexicalError(String msg)
 	{
-		return String.format("%d: Lexical error: %s", yyline + 1, yytext());
+		return new LexicalError(msg, yyline + 1, yycolumn + 1);
 	}
 	
 	/* get current token's line */
@@ -112,7 +113,7 @@ String = \" ({StringChar} | "\\"n | "\\"t | \\\" | \\\\ )* \"
 							} catch (NumberFormatException e) {
 							
 								// we know for sure that this numeric expression cannot be an integer (not even a negative one)
-								throw new LexicalError(getErrorMessage());
+								throw getLexicalError(String.format("%s is not an Integer", yytext()));
 
 							}
 							   
@@ -169,10 +170,10 @@ String = \" ({StringChar} | "\\"n | "\\"t | \\\" | \\\\ )* \"
 									yybegin(YYINITIAL);  } 
 	[^]							{   /* ignore  */  }
 	<<EOF>>                     {   /* comment was not closed */
-									throw new LexicalError(getErrorMessage());
+									throw getLexicalError("missing */");
 								}
 }
 
 
 
-[^]                             { throw new LexicalError(getErrorMessage()); }
+[^]                             { throw getLexicalError("invalid char: " + yytext()); }

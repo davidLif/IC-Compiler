@@ -332,10 +332,11 @@ public class Lexer implements java_cup.runtime.Scanner {
 		return new Token(id, null, yyline + 1, yycolumn + 1);
 	}
 	
-	/* error message to print on lexical error */
-	private String getErrorMessage()
+	
+	/* this method builds a new lexical error object */
+	private LexicalError getLexicalError(String msg)
 	{
-		return String.format("%d: Lexical error: %s", yyline + 1, yytext());
+		return new LexicalError(msg, yyline + 1, yycolumn + 1);
 	}
 	
 	/* get current token's line */
@@ -722,7 +723,7 @@ public class Lexer implements java_cup.runtime.Scanner {
 
       switch (zzAction < 0 ? zzAction : ZZ_ACTION[zzAction]) {
         case 1: 
-          { throw new LexicalError(getErrorMessage());
+          { throw getLexicalError("invalid char: " + yytext());
           }
         case 53: break;
         case 2: 
@@ -735,7 +736,7 @@ public class Lexer implements java_cup.runtime.Scanner {
 							} catch (NumberFormatException e) {
 							
 								// we know for sure that this numeric expression cannot be an integer (not even a negative one)
-								throw new LexicalError(getErrorMessage());
+								throw getLexicalError(String.format("%s is not an Integer", yytext()));
 
 							}
           }
@@ -948,7 +949,7 @@ public class Lexer implements java_cup.runtime.Scanner {
             switch (zzLexicalState) {
             case COMMENT: {
               /* comment was not closed */
-									throw new LexicalError(getErrorMessage());
+									throw getLexicalError("missing */");
             }
             case 131: break;
             default:

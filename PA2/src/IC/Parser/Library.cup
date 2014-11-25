@@ -12,6 +12,16 @@ public void syntax_error(Symbol s) {
 		Token tok = (Token) s;
 		System.out.println("Line " + tok.getLine()+ ": Syntax error; unexpected " + tok);
 	}
+public void report_error(String message, Object info){
+
+	List tokens = expected_token_ids();
+	System.out.println("Expected: ");
+	for(Integer i : tokens)
+	{
+		System.out.println(symbol_name_from_id(i));
+	}
+}
+	
 :}
 
 /* ids */
