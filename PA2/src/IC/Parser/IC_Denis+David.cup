@@ -373,6 +373,7 @@ literal ::=  INTEGER
 
 expr ::= location : loc
 	{: RESULT = loc; :}
+
 		| call: call_exp
 	{: RESULT = call_exp; :}
 		| THIS
@@ -382,14 +383,15 @@ expr ::= location : loc
 	   | type:type_type SQUARELB expr:exp  SQUARERB
 	{: RESULT = new NewArray(type_type, exp); :}
 	   |  expr:exp DOT  LENGTH
-	{: RESULT = loc; :}
-        |    expr:exp_1 binop:binop_op  expr:exp_2
-	{: RESULT = new BinaryOp(exp_1, binop_op, exp_2);  :}
-		| unop:unop_op expr:exp
+	{: RESULT = null; :} /*fix meeeee */
+
+        |    expr:exp_1  binop:binop_op  expr:exp_2 SEMCOL /*fix me - ambuguity? */
+	{:RESULT   :}
+		| SEMCOL unop:unop_op expr:exp   SEMCOL   /*fix me - ambuguity? */
 	{: RESULT = 	new UnaryOp(unop_op, exp); :} 
-		| literal: l
+		| literal:l SEMCOL  /*fix me - ambuguity? */
 	{: return l; :}
-		|  LP expr:exp RP
+		| SEMCOL LP expr:exp RP SEMCOL SEMCOL   /*fix me - ambuguity? */
 	{: return new ExpressionBlock(exp); :}
 	;
 	
@@ -427,7 +429,7 @@ stmt ::= location : loc EQ expr:exp SEMCOL
 	;
 	
 	/* UNTIL GT FIXED */
-	stmt_lst ::= ID
+	stmt_lst ::= expr
 	{: RESULT = null; :}
 	;
 	
