@@ -44,10 +44,6 @@ nonterminal List<Formal> comma_formal_list;
 nonterminal List<Formal> formal_list;
 nonterminal List<Formal> formal_list_opt;
 
-nonterminal List<Statement> stmt_list;
-nonterminal Statement statement;
-nonterminal List<Statement> stmt_list_opt;
-
 
 nonterminal Call call;
 nonterminal VirtualCall virtual_call;
@@ -70,8 +66,8 @@ nonterminal expr;
 nonterminal binop;
 nonterminal unop;
 nonterminal literal;
-nonterminal stmt_star;
 nonterminal stmt_lst;
+nonterminal stmt_lst_not_empty;
 
 //////////////////////////
 // Precedence declarations
@@ -89,7 +85,7 @@ static_call ::= CLASSID:class_id DOT ID:id LP exp_list_op:lst RP
 			{: RESULT = new StaticCall(1,class_id,id,lst); :}
 			;
 			
-virtual_call ::= exp:e DOT ID:id LP exp_list_op:lst RP 
+virtual_call ::= expr:e DOT ID:id LP exp_list_op:lst RP 
 			{: RESULT = new VirtualCall(1,e,id,lst);:}
 			| ID:id LP exp_list_op:lst RP 
 			{: RESULT = new VirtualCall(1,new Literal(-1,LiteralTypes.STRING),id,lst);:}
@@ -99,11 +95,11 @@ empty ::=	{: :};
 			
 exp_list_op ::= exp_list:lst {: :} | empty {: RESULT = new ArrayList<Expression>(); :};
 
-exp_list ::= exp:e 
+exp_list ::= expr:e 
 			{:  List<Expression> lst = new ArrayList<Expression>();
 				lst.add(e);
 				RESULT = lst; :}
-			| exp_list:lst exp:e 
+			| exp_list:lst expr:e 
 			{:  lst.add(e);
 				RESULT = lst; :}
 			;
@@ -114,19 +110,12 @@ location ::= variable_location:loc {: RESULT =loc; :}
 			;
 			
 variable_location ::= ID:id {: RESULT = new VariableLocation(1,id); :}
-					| exp:e DOT ID:id {: RESULT = new VariableLocation(1,e,id); :}
+					| expr:e DOT ID:id {: RESULT = new VariableLocation(1,e,id); :}
 					;
 
-array_location ::= exp:out_exp SQUARELB exp:in_exp SQUARERB
+array_location ::= expr:out_exp SQUARELB expr:in_exp SQUARERB
 				{: RESULT = new ArrayLocation(out_exp,in_exp); :}
 				;
-			
-/*FOR TESTING ONLY*/
-exp ::= INTEGER {: RESULT = new Literal(1,LiteralTypes.STRING); :}
-	;
-	
-	
-	
 	
 	
 	
@@ -260,20 +249,20 @@ return_type ::= type:t
 
 
 /* handles deriving both virtual and static methods */	
-method ::= STATIC return_type:t ID:name LP formal_list_opt:formals RP CLP stmt_list:stmts CRP
+method ::= STATIC return_type:t ID:name LP formal_list_opt:formals RP CLP stmt_lst:stmts CRP
 	{:
 		/* static method with statement list*/
 		RESULT = new StaticMethod(t, name, formals, stmts);
 		
 	:}
 	|
-	type:t ID:name LP formal_list_opt:formals RP CLP stmt_list:stmts CRP
+	type:t ID:name LP formal_list_opt:formals RP CLP stmt_lst:stmts CRP
 	{:
 		/* virtual method, non void, method with statement list */
 			RESULT = new VirtualMethod(t, name, formals, stmts);
 	:}
 	|
-	VOID ID:name LP formal_list_opt:formals RP CLP stmt_list:stmts CRP
+	VOID ID:name LP formal_list_opt:formals RP CLP stmt_lst:stmts CRP
 	{:
 		/* void virtual method with statement list */
 			RESULT = new VirtualMethod(new PrimitiveType(-1, DataTypes.VOID), name, formals, stmts);
@@ -328,34 +317,6 @@ formal_list_opt ::= formal_list:lst
 	{: RESULT = lst; :}
 	| empty
 	{: RESULT = new ArrayList<Formal>(); :}
-	;
-
-/* statement list, non empty */
-stmt_list ::= statement:stmt
-	{: RESULT = new ArrayList<Statement>(); RESULT.add(stmt); :}
-	| stmt_list:lst statement:stmt
-	{: lst.add(stmt); RESULT = lst; :}
-	
-	;
-
-stmt_list_opt ::= empty
-	{: RESULT = new ArrayList<Statement>(); :}
-	| stmt_list:lst
-	{: RESULT = lst; :}
-	;
-	
-statement ::= BREAK SEMCOL
-	{:
-		RESULT = new Break(-1);
-	:}
-	/*| call:c SEMCOL 
-	{:
-		RESULT = new CallStatement(c);
-	:}*/
-	| location:loc EQ exp:e SEMCOL
-	{:
-		RESULT = new Assignment(loc,e);
-	:}
 	;
 	
 	
@@ -449,23 +410,24 @@ stmt ::= location : loc EQ expr:exp SEMCOL
 	{: RESULT =  new Continue(getLIne());  :}
 		| SQUARELB stmt:st SQUARERB SEMCOL  // FIXXXXXXX
 	{: RESULT =new UnaryOp(unop_op, exp); :} 
-			| SQUARELB stmt_star: st  SQUARERB SEMCOL  
+			| SQUARELB stmt_lst: st  SQUARERB SEMCOL  
 	{: RESULT = new StatementsBlock(getLine(), st); :} 
 		|  type: t ID: id EQ expr:exp SEMCOL
 	{: return  new Assignment( id , exp :}
 	;
 	
-stmt_star ::= stmt_lst:lst
-	{: RESULT = new StatementsBlock(getLine(),lst); :}	
+stmt_lst ::= stmt_lst_not_empty:lst
+	{: RESULT = lst :}
+	| empty 
+	{: RESULT = new ArrayList<Statement>():}
 ;
-stmt_lst ::= stmt :s
+
+stmt_lst_not_empty ::= stmt :s
 {: RESULT = new ArrayList<Statement>();
    RESULT.add(s);
 :}
 |   stmt_lst: st_lst stmt:s
 {: st_lst.add(s);
    RESULT = st_list; :}
-| empty
-{: RESULT = null; :}
 ;
 	
