@@ -62,6 +62,17 @@ nonterminal Test_start;
 nonterminal empty;
 nonterminal List<Expression> exp_list_op;
 
+
+
+nonterminal stmt;
+nonterminal expr;
+
+nonterminal binop;
+nonterminal unop;
+nonterminal literal;
+nonterminal stmt_star;
+nonterminal stmt_lst;
+
 //////////////////////////
 // Precedence declarations
 
@@ -346,3 +357,115 @@ statement ::= BREAK SEMCOL
 		RESULT = new Assignment(loc,e);
 	:}
 	;
+	
+	
+	
+	
+
+binop ::= 	ADD
+{: RESULT = BinaryOps.PLUS; :}
+|  MINUS
+{: RESULT = BinaryOps.MINUS; :}
+|   MULT
+{: RESULT = BinaryOps.MULTIPLY; :}
+|   DIV
+{: RESULT = BinaryOps.DIVIDE; :}
+|   MOD
+{: RESULT = BinaryOps.MOD; :}
+|   LESSTHAN
+{: RESULT = BinaryOps.LT; :}
+|   LESSTHANEQ
+{: RESULT = BinaryOps.LTE; :}
+|  GREATERTHAN
+{: RESULT = BinaryOps.GT; :}
+|   GREATERTHANEQ
+{: RESULT = BinaryOps.GTE; :}
+|  EQ
+{: RESULT = BinaryOps.EQUAL; :}
+|  NOTEQ
+{: RESULT = BinaryOps.NEQUAL; :}
+;
+
+unop ::=   MINUS
+{: RESULT = UnaryOps.UMINUS; :}  
+|  NOT  
+{: RESULT = UnaryOps.LNEG; :}  
+;
+
+literal ::=  INTEGER
+{: RESULT = LiteralType.INTEGER; :}
+| STRING
+{: RESULT = LiteralType.STRING; :}
+| FALSE
+{: RESULT = LiteralType.FALSE; :}
+| NULL
+{: RESULT = LiteralType.NULL; :}
+| TRUE
+{: RESULT = LiteralType.TRUE; :}
+;
+
+		
+
+	
+	
+expr ::= location : loc
+	{: RESULT = loc; :}
+		| call: call_exp
+	{: RESULT = call_exp; :}
+		| THIS
+	{: RESULT = new This(getLine()); :}
+	   |  CLASSID:class_name LP RP
+	{: RESULT = new NewClass(getLine(), class_name); :}
+	   | type:type_type SQUARELB expr:exp  SQUARERB
+	{: RESULT = new NewArray(type_type, exp); :}
+	   |  expr:exp DOT  LENGTH
+	{: RESULT = loc; :}
+        |    expr:exp_1 binop:binop_op  expr:exp_2
+	{: RESULT = new BinaryOp(exp_1, binop_op, exp_2);  :}
+		| unop:unop_op expr:exp
+	{: RESULT = 	new UnaryOp(unop_op, exp); :} 
+		| literal: l
+	{: return l; :}
+		|  LP expr:exp RP
+	{: return new ExpressionBlock(exp); :}
+	;
+	
+	
+	
+	
+stmt ::= location : loc EQ expr:exp SEMCOL
+	{: RESULT = NEW Assignment(loc, exp); :}
+		| call: call_exp SEMCOL
+	{: RESULT = new CallStatement(call_exp); :}
+		| RETURN  expr:exp  SEMCOL
+	{: RESULT = new Return(getLine(), exp); :}
+	   | IF LP expr:exp RP stmt: st1  ELSE stmt:st2 
+	{: RESULT = new If(exp, st1, st2); :}
+	   | WHILE LP expr:exp RP stmt:st
+	{: RESULT = new While(exp , st ); :}
+	   |  BREAK SEMCOL
+	{: RESULT = new Break(getLine()) :}
+	   |   CONTINUE SEMCOL
+	{: RESULT =  new Continue(getLIne());  :}
+		| SQUARELB stmt:st SQUARERB SEMCOL  // FIXXXXXXX
+	{: RESULT =new UnaryOp(unop_op, exp); :} 
+			| SQUARELB stmt_star: st  SQUARERB SEMCOL  
+	{: RESULT = new StatementsBlock(getLine(), st); :} 
+		|  type: t ID: id EQ expr:exp SEMCOL
+	{: return  new Assignment( id , exp :}
+	;
+	
+stmt_star ::= stmt_lst:lst
+	{: RESULT = new StatementsBlock(getLine(),lst); :}	
+;
+stmt_lst ::= stmt :s
+{: RESULT = new ArrayList<Statement>();
+   RESULT.add(s);
+:}
+|   stmt_lst: st_lst stmt:s
+{: st_lst.add(s);
+   RESULT = st_list; :}
+| empty
+{: RESULT = null; :}
+;
+	
