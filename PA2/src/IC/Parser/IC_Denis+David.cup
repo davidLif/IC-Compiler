@@ -345,6 +345,10 @@ binop ::= 	ADD
 {: RESULT = BinaryOps.EQUAL; :}
 |  NOTEQ
 {: RESULT = BinaryOps.NEQUAL; :}
+|  AND
+{: RESULT = BinaryOps.LAND; :}
+|  OR
+{: RESULT = BinaryOps.LOR; :}
 ;
 
 unop ::=   MINUS
@@ -367,8 +371,6 @@ literal ::=  INTEGER
 
 		
 
-	
-	
 expr ::= location : loc
 	{: RESULT = loc; :}
 		| call: call_exp
@@ -392,7 +394,13 @@ expr ::= location : loc
 	;
 	
 	
+
+/*
+	stmt ::= location : loc EQ expr:exp SEMCOL
+	{: RESULT = NEW Assignment(loc, exp); :}
+	;
 	
+*/
 	
 stmt ::= location : loc EQ expr:exp SEMCOL
 	{: RESULT = NEW Assignment(loc, exp); :}
@@ -408,14 +416,22 @@ stmt ::= location : loc EQ expr:exp SEMCOL
 	{: RESULT = new Break(getLine()) :}
 	   |   CONTINUE SEMCOL
 	{: RESULT =  new Continue(getLIne());  :}
-		| SQUARELB stmt:st SQUARERB SEMCOL  // FIXXXXXXX
-	{: RESULT =new UnaryOp(unop_op, exp); :} 
-			| SQUARELB stmt_lst: st  SQUARERB SEMCOL  
-	{: RESULT = new StatementsBlock(getLine(), st); :} 
+
+
 		|  type: t ID: id EQ expr:exp SEMCOL
-	{: return  new Assignment( id , exp :}
+	{: RESULT =  new Assignment( id , exp); :}
+			|  type: t ID: id  SEMCOL
+	{: RESULT =   LocalVariable(t,id); :}
+				| SQUARELB stmt_lst: st  SQUARERB SEMCOL  
+	{: RESULT = new StatementsBlock(getLine(), st); :} 
 	;
 	
+	/* UNTIL GT FIXED */
+	stmt_lst ::= ID
+	{: RESULT = null; :}
+	;
+	
+	/*
 stmt_lst ::= stmt_lst_not_empty:lst
 	{: RESULT = lst :}
 	| empty 
@@ -430,4 +446,7 @@ stmt_lst_not_empty ::= stmt :s
 {: st_lst.add(s);
    RESULT = st_list; :}
 ;
+
+
+*/
 	
