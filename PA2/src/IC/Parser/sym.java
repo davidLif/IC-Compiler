@@ -9,8 +9,10 @@ package IC.Parser;
 public class sym {
   /* terminals */
   public static final int GREATERTHAN = 41;
+  public static final int METHOD_CALL = 51;
   public static final int STRING_LITERAL = 21;
   public static final int MULT = 36;
+  public static final int UMINUS = 49;
   public static final int INTEGER = 20;
   public static final int CONTINUE = 15;
   public static final int INT = 7;
@@ -50,6 +52,7 @@ public class sym {
   public static final int WHILE = 13;
   public static final int LESSTHANEQ = 40;
   public static final int EXTENDS = 4;
+  public static final int ARR_ACCESS = 50;
   public static final int STRING = 9;
   public static final int GREATERTHANEQ = 42;
   public static final int FALSE = 22;
@@ -106,7 +109,10 @@ public class sym {
   "AND",
   "OR",
   "NOT",
-  "ASSIGN"
+  "ASSIGN",
+  "UMINUS",
+  "ARR_ACCESS",
+  "METHOD_CALL"
   };
 }
 
