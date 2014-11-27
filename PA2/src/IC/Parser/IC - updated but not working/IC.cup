@@ -367,17 +367,17 @@ exp_comma_list ::= COMMA expr:exp
 
 expr ::= location:loc
 	{: RESULT = loc; :}
-		| call:call_exp
+	| call:call_exp
 	{: RESULT = call_exp; :}
-		| THIS
+	| THIS
 	{: RESULT = new This(getLine()); :}
-	   |  NEW CLASSID:class_name LP RP
+	|  NEW CLASSID:class_name LP RP
 	{: RESULT = new NewClass(getLine(), class_name); :}
-	   |  NEW type:t SQUARELB expr:exp  SQUARERB
+	|  NEW type:t SQUARELB expr:exp  SQUARERB
 	{: RESULT = new NewArray(type, exp); :}
-	   |  expr:exp DOT LENGTH
+	|  expr:exp DOT LENGTH
 	{: RESULT = new Length(exp); :} 
-        |    expr:exp_1  binop:op  expr:exp_2
+    |  expr:exp_1  binop:op  expr:exp_2
 	{:
 		if(op.isMath())
 		{
@@ -389,7 +389,7 @@ expr ::= location:loc
 		}
 	
 	:}
-		|  unop:op expr:exp 
+	|  unop:op expr:exp 
 	{: 
 		if(op.isMath())
 		{
@@ -399,11 +399,11 @@ expr ::= location:loc
 			RESULT = new LogicalUnaryOp(op, exp);
 
 	:} 
-		| literal:l 
+	| literal:l 
 	{: 
-		| RESULT = l;
+		 RESULT = l;
 	:}
-		| LP expr:exp RP 
+	| LP expr:exp RP 
 	{: RESULT = new ExpressionBlock(exp); :}
 ;
 	
