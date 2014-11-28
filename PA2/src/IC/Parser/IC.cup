@@ -102,7 +102,8 @@ nonterminal empty; /* epsilon derivation */
 // Precedence declarations
 precedence right ELSE;
 precedence right ASSIGN;
-precedence left AND, OR;
+precedence left OR;
+precedence left AND;
 precedence left EQ, NOTEQ;
 precedence left LESSTHAN, LESSTHANEQ, GREATERTHAN, GREATERTHANEQ;
 precedence left ADD, MINUS;
