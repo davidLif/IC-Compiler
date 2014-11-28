@@ -147,9 +147,9 @@ icclass ::= CLASS CLASSID:name extends_opt:superclass CLP fields_methods_list:ls
 				methods.add((Method)item);
 		}
 		if(superclass == null)
-			RESULT = new ICClass( -1, name, fields, methods);
+			RESULT = new ICClass( getLine(), name, fields, methods);
 		else
-			RESULT = new ICClass(-1, name, superclass, fields, methods);
+			RESULT = new ICClass(getLine(), name, superclass, fields, methods);
 		
 	:}
 	| CLASS CLASSID:name extends_opt:superclass CLP CRP
@@ -157,9 +157,9 @@ icclass ::= CLASS CLASSID:name extends_opt:superclass CLP fields_methods_list:ls
 		List<Field> fields = new ArrayList<Field>();
 		List<Method> methods = new ArrayList<Method>();
 		if(superclass == null)
-			RESULT = new ICClass( -1, name, fields, methods);
+			RESULT = new ICClass( getLine(), name, fields, methods);
 		else
-			RESULT = new ICClass(-1, name, superclass, fields, methods);
+			RESULT = new ICClass(getLine(), name, superclass, fields, methods);
 	:}
 	;
 
@@ -231,13 +231,13 @@ extends_opt ::= empty
 
 /* represents types */
 type ::= INT
-	{: RESULT = new PrimitiveType( -1, DataTypes.INT); :}
+	{: RESULT = new PrimitiveType( getLine(), DataTypes.INT); :}
 	| BOOL
-	{: RESULT = new PrimitiveType( -1, DataTypes.BOOLEAN); :}
+	{: RESULT = new PrimitiveType( getLine(), DataTypes.BOOLEAN); :}
 	| STRING
-	{: RESULT = new PrimitiveType( -1, DataTypes.STRING); :}
+	{: RESULT = new PrimitiveType( getLine(), DataTypes.STRING); :}
 	| CLASSID:name
-	{: RESULT = new UserType( -1, name); :}
+	{: RESULT = new UserType( getLine(), name); :}
 	| type:t SQUARELB SQUARERB
 	{: RESULT = t; RESULT.incrementDimension(); :}
 	;
@@ -246,7 +246,7 @@ type ::= INT
 return_type ::= type:t 
 	{: RESULT = t; :}
 	| VOID
-	{: RESULT = new PrimitiveType(-1, DataTypes.VOID); :}
+	{: RESULT = new PrimitiveType(getLine(), DataTypes.VOID); :}
 	;
 
 
@@ -267,7 +267,7 @@ method ::= STATIC return_type:t ID:name LP formal_list_opt:formals RP CLP stmt_l
 	VOID ID:name LP formal_list_opt:formals RP CLP stmt_lst:stmts CRP
 	{:
 		/* void virtual method with statement list */
-			RESULT = new VirtualMethod(new PrimitiveType(-1, DataTypes.VOID), name, formals, stmts);
+			RESULT = new VirtualMethod(new PrimitiveType(getLine(), DataTypes.VOID), name, formals, stmts);
 	:}
 	|
 	type:t ID:name LP formal_list_opt:formals RP CLP CRP
@@ -279,7 +279,7 @@ method ::= STATIC return_type:t ID:name LP formal_list_opt:formals RP CLP stmt_l
 	VOID ID:name LP formal_list_opt:formals RP CLP CRP
 	{:
 		/* void virtual method without statement list */
-		RESULT = new VirtualMethod(new PrimitiveType(-1, DataTypes.VOID), name, formals, new ArrayList<Statement>());
+		RESULT = new VirtualMethod(new PrimitiveType(getLine(), DataTypes.VOID), name, formals, new ArrayList<Statement>());
 	:}
 	|
 	STATIC return_type:t ID:name LP formal_list_opt:formals RP CLP CRP
@@ -546,29 +546,29 @@ empty ::=
 
 static_call ::= CLASSID:class_name DOT ID:name LP RP 
 			/* static call without expression list */
-			{: RESULT = new StaticCall(1, class_name, name, new ArrayList<Expression>()); :}
+			{: RESULT = new StaticCall(getLine(), class_name, name, new ArrayList<Expression>()); :}
 			%prec METHOD_CALL
 			| CLASSID:class_name DOT ID:name LP exp_list:lst RP
 			/* static call WITH expression list */
-			{: RESULT = new StaticCall(1, class_name, name, lst); :}
+			{: RESULT = new StaticCall(getLine(), class_name, name, lst); :}
 			%prec METHOD_CALL
 ;
 			
 virtual_call ::= expr:e DOT ID:name LP exp_list:lst RP 
 			/* with location, with expression list */
-			{: RESULT = new VirtualCall(1, e, name, lst); :}
+			{: RESULT = new VirtualCall(getLine(), e, name, lst); :}
 			%prec METHOD_CALL
 			| ID:name LP exp_list:lst RP 
 			/* without location, with expression list */
-			{: RESULT = new VirtualCall(1, null, name, lst); :}
+			{: RESULT = new VirtualCall(getLine(), null, name, lst); :}
 			 %prec METHOD_CALL
 			/* with location, without expression list */
 			| expr:e DOT ID:name LP RP
-			{: RESULT = new VirtualCall(1, e, name, new ArrayList<Expression>()); :}
+			{: RESULT = new VirtualCall(getLine(), e, name, new ArrayList<Expression>()); :}
 			%prec METHOD_CALL
 			/* without location, without expression list */
 			| ID:name LP RP
-			{: RESULT = new VirtualCall(1, null, name, new ArrayList<Expression>()); :}
+			{: RESULT = new VirtualCall(getLine(), null, name, new ArrayList<Expression>()); :}
 			%prec METHOD_CALL
 ;
 

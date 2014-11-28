@@ -747,9 +747,9 @@ class CUP$parser$actions {
 				methods.add((Method)item);
 		}
 		if(superclass == null)
-			RESULT = new ICClass( -1, name, fields, methods);
+			RESULT = new ICClass( getLine(), name, fields, methods);
 		else
-			RESULT = new ICClass(-1, name, superclass, fields, methods);
+			RESULT = new ICClass(getLine(), name, superclass, fields, methods);
 		
 	
               CUP$parser$result = parser.getSymbolFactory().newSymbol("icclass",2, ((java_cup.runtime.Symbol)CUP$parser$stack.elementAt(CUP$parser$top-5)), ((java_cup.runtime.Symbol)CUP$parser$stack.peek()), RESULT);
@@ -770,9 +770,9 @@ class CUP$parser$actions {
 		List<Field> fields = new ArrayList<Field>();
 		List<Method> methods = new ArrayList<Method>();
 		if(superclass == null)
-			RESULT = new ICClass( -1, name, fields, methods);
+			RESULT = new ICClass( getLine(), name, fields, methods);
 		else
-			RESULT = new ICClass(-1, name, superclass, fields, methods);
+			RESULT = new ICClass(getLine(), name, superclass, fields, methods);
 	
               CUP$parser$result = parser.getSymbolFactory().newSymbol("icclass",2, ((java_cup.runtime.Symbol)CUP$parser$stack.elementAt(CUP$parser$top-4)), ((java_cup.runtime.Symbol)CUP$parser$stack.peek()), RESULT);
             }
@@ -950,7 +950,7 @@ class CUP$parser$actions {
           case 17: // type ::= INT 
             {
               Type RESULT =null;
-		 RESULT = new PrimitiveType( -1, DataTypes.INT); 
+		 RESULT = new PrimitiveType( getLine(), DataTypes.INT); 
               CUP$parser$result = parser.getSymbolFactory().newSymbol("type",6, ((java_cup.runtime.Symbol)CUP$parser$stack.peek()), ((java_cup.runtime.Symbol)CUP$parser$stack.peek()), RESULT);
             }
           return CUP$parser$result;
@@ -959,7 +959,7 @@ class CUP$parser$actions {
           case 18: // type ::= BOOL 
             {
               Type RESULT =null;
-		 RESULT = new PrimitiveType( -1, DataTypes.BOOLEAN); 
+		 RESULT = new PrimitiveType( getLine(), DataTypes.BOOLEAN); 
               CUP$parser$result = parser.getSymbolFactory().newSymbol("type",6, ((java_cup.runtime.Symbol)CUP$parser$stack.peek()), ((java_cup.runtime.Symbol)CUP$parser$stack.peek()), RESULT);
             }
           return CUP$parser$result;
@@ -968,7 +968,7 @@ class CUP$parser$actions {
           case 19: // type ::= STRING 
             {
               Type RESULT =null;
-		 RESULT = new PrimitiveType( -1, DataTypes.STRING); 
+		 RESULT = new PrimitiveType( getLine(), DataTypes.STRING); 
               CUP$parser$result = parser.getSymbolFactory().newSymbol("type",6, ((java_cup.runtime.Symbol)CUP$parser$stack.peek()), ((java_cup.runtime.Symbol)CUP$parser$stack.peek()), RESULT);
             }
           return CUP$parser$result;
@@ -980,7 +980,7 @@ class CUP$parser$actions {
 		int nameleft = ((java_cup.runtime.Symbol)CUP$parser$stack.peek()).left;
 		int nameright = ((java_cup.runtime.Symbol)CUP$parser$stack.peek()).right;
 		String name = (String)((java_cup.runtime.Symbol) CUP$parser$stack.peek()).value;
-		 RESULT = new UserType( -1, name); 
+		 RESULT = new UserType( getLine(), name); 
               CUP$parser$result = parser.getSymbolFactory().newSymbol("type",6, ((java_cup.runtime.Symbol)CUP$parser$stack.peek()), ((java_cup.runtime.Symbol)CUP$parser$stack.peek()), RESULT);
             }
           return CUP$parser$result;
@@ -1013,7 +1013,7 @@ class CUP$parser$actions {
           case 23: // return_type ::= VOID 
             {
               Type RESULT =null;
-		 RESULT = new PrimitiveType(-1, DataTypes.VOID); 
+		 RESULT = new PrimitiveType(getLine(), DataTypes.VOID); 
               CUP$parser$result = parser.getSymbolFactory().newSymbol("return_type",9, ((java_cup.runtime.Symbol)CUP$parser$stack.peek()), ((java_cup.runtime.Symbol)CUP$parser$stack.peek()), RESULT);
             }
           return CUP$parser$result;
@@ -1082,7 +1082,7 @@ class CUP$parser$actions {
 		List<Statement> stmts = (List<Statement>)((java_cup.runtime.Symbol) CUP$parser$stack.elementAt(CUP$parser$top-1)).value;
 		
 		/* void virtual method with statement list */
-			RESULT = new VirtualMethod(new PrimitiveType(-1, DataTypes.VOID), name, formals, stmts);
+			RESULT = new VirtualMethod(new PrimitiveType(getLine(), DataTypes.VOID), name, formals, stmts);
 	
               CUP$parser$result = parser.getSymbolFactory().newSymbol("method",3, ((java_cup.runtime.Symbol)CUP$parser$stack.elementAt(CUP$parser$top-7)), ((java_cup.runtime.Symbol)CUP$parser$stack.peek()), RESULT);
             }
@@ -1121,7 +1121,7 @@ class CUP$parser$actions {
 		List<Formal> formals = (List<Formal>)((java_cup.runtime.Symbol) CUP$parser$stack.elementAt(CUP$parser$top-3)).value;
 		
 		/* void virtual method without statement list */
-		RESULT = new VirtualMethod(new PrimitiveType(-1, DataTypes.VOID), name, formals, new ArrayList<Statement>());
+		RESULT = new VirtualMethod(new PrimitiveType(getLine(), DataTypes.VOID), name, formals, new ArrayList<Statement>());
 	
               CUP$parser$result = parser.getSymbolFactory().newSymbol("method",3, ((java_cup.runtime.Symbol)CUP$parser$stack.elementAt(CUP$parser$top-6)), ((java_cup.runtime.Symbol)CUP$parser$stack.peek()), RESULT);
             }
@@ -1929,7 +1929,7 @@ class CUP$parser$actions {
 		int nameleft = ((java_cup.runtime.Symbol)CUP$parser$stack.elementAt(CUP$parser$top-2)).left;
 		int nameright = ((java_cup.runtime.Symbol)CUP$parser$stack.elementAt(CUP$parser$top-2)).right;
 		String name = (String)((java_cup.runtime.Symbol) CUP$parser$stack.elementAt(CUP$parser$top-2)).value;
-		 RESULT = new StaticCall(1, class_name, name, new ArrayList<Expression>()); 
+		 RESULT = new StaticCall(getLine(), class_name, name, new ArrayList<Expression>()); 
               CUP$parser$result = parser.getSymbolFactory().newSymbol("static_call",23, ((java_cup.runtime.Symbol)CUP$parser$stack.elementAt(CUP$parser$top-4)), ((java_cup.runtime.Symbol)CUP$parser$stack.peek()), RESULT);
             }
           return CUP$parser$result;
@@ -1947,7 +1947,7 @@ class CUP$parser$actions {
 		int lstleft = ((java_cup.runtime.Symbol)CUP$parser$stack.elementAt(CUP$parser$top-1)).left;
 		int lstright = ((java_cup.runtime.Symbol)CUP$parser$stack.elementAt(CUP$parser$top-1)).right;
 		List<Expression> lst = (List<Expression>)((java_cup.runtime.Symbol) CUP$parser$stack.elementAt(CUP$parser$top-1)).value;
-		 RESULT = new StaticCall(1, class_name, name, lst); 
+		 RESULT = new StaticCall(getLine(), class_name, name, lst); 
               CUP$parser$result = parser.getSymbolFactory().newSymbol("static_call",23, ((java_cup.runtime.Symbol)CUP$parser$stack.elementAt(CUP$parser$top-5)), ((java_cup.runtime.Symbol)CUP$parser$stack.peek()), RESULT);
             }
           return CUP$parser$result;
@@ -1965,7 +1965,7 @@ class CUP$parser$actions {
 		int lstleft = ((java_cup.runtime.Symbol)CUP$parser$stack.elementAt(CUP$parser$top-1)).left;
 		int lstright = ((java_cup.runtime.Symbol)CUP$parser$stack.elementAt(CUP$parser$top-1)).right;
 		List<Expression> lst = (List<Expression>)((java_cup.runtime.Symbol) CUP$parser$stack.elementAt(CUP$parser$top-1)).value;
-		 RESULT = new VirtualCall(1, e, name, lst); 
+		 RESULT = new VirtualCall(getLine(), e, name, lst); 
               CUP$parser$result = parser.getSymbolFactory().newSymbol("virtual_call",22, ((java_cup.runtime.Symbol)CUP$parser$stack.elementAt(CUP$parser$top-5)), ((java_cup.runtime.Symbol)CUP$parser$stack.peek()), RESULT);
             }
           return CUP$parser$result;
@@ -1980,7 +1980,7 @@ class CUP$parser$actions {
 		int lstleft = ((java_cup.runtime.Symbol)CUP$parser$stack.elementAt(CUP$parser$top-1)).left;
 		int lstright = ((java_cup.runtime.Symbol)CUP$parser$stack.elementAt(CUP$parser$top-1)).right;
 		List<Expression> lst = (List<Expression>)((java_cup.runtime.Symbol) CUP$parser$stack.elementAt(CUP$parser$top-1)).value;
-		 RESULT = new VirtualCall(1, null, name, lst); 
+		 RESULT = new VirtualCall(getLine(), null, name, lst); 
               CUP$parser$result = parser.getSymbolFactory().newSymbol("virtual_call",22, ((java_cup.runtime.Symbol)CUP$parser$stack.elementAt(CUP$parser$top-3)), ((java_cup.runtime.Symbol)CUP$parser$stack.peek()), RESULT);
             }
           return CUP$parser$result;
@@ -1995,7 +1995,7 @@ class CUP$parser$actions {
 		int nameleft = ((java_cup.runtime.Symbol)CUP$parser$stack.elementAt(CUP$parser$top-2)).left;
 		int nameright = ((java_cup.runtime.Symbol)CUP$parser$stack.elementAt(CUP$parser$top-2)).right;
 		String name = (String)((java_cup.runtime.Symbol) CUP$parser$stack.elementAt(CUP$parser$top-2)).value;
-		 RESULT = new VirtualCall(1, e, name, new ArrayList<Expression>()); 
+		 RESULT = new VirtualCall(getLine(), e, name, new ArrayList<Expression>()); 
               CUP$parser$result = parser.getSymbolFactory().newSymbol("virtual_call",22, ((java_cup.runtime.Symbol)CUP$parser$stack.elementAt(CUP$parser$top-4)), ((java_cup.runtime.Symbol)CUP$parser$stack.peek()), RESULT);
             }
           return CUP$parser$result;
@@ -2007,7 +2007,7 @@ class CUP$parser$actions {
 		int nameleft = ((java_cup.runtime.Symbol)CUP$parser$stack.elementAt(CUP$parser$top-2)).left;
 		int nameright = ((java_cup.runtime.Symbol)CUP$parser$stack.elementAt(CUP$parser$top-2)).right;
 		String name = (String)((java_cup.runtime.Symbol) CUP$parser$stack.elementAt(CUP$parser$top-2)).value;
-		 RESULT = new VirtualCall(1, null, name, new ArrayList<Expression>()); 
+		 RESULT = new VirtualCall(getLine(), null, name, new ArrayList<Expression>()); 
               CUP$parser$result = parser.getSymbolFactory().newSymbol("virtual_call",22, ((java_cup.runtime.Symbol)CUP$parser$stack.elementAt(CUP$parser$top-2)), ((java_cup.runtime.Symbol)CUP$parser$stack.peek()), RESULT);
             }
           return CUP$parser$result;
