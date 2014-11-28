@@ -21,7 +21,7 @@ import java_cup.runtime.*;
 	/* 
 		return new token of type id with given value
 	*/
-	private Token getToken(int id, String value)
+	private Token getToken(int id, Object value)
 	{
 		return new Token(id, value, yyline + 1, yycolumn + 1);
 	}
@@ -45,6 +45,10 @@ import java_cup.runtime.*;
 		return yyline + 1; 
 	}
 %}
+
+%eofval{
+	return getToken(sym.EOF);
+%eofval}
 
 
 /* define Integer literal */
@@ -107,8 +111,8 @@ String = \" ({StringChar} | "\\"n | "\\"t | \\\" | \\\\ )* \"
 							try {
 									// try to parse the number to Integer (signed int has the same range as IC spec)
 									// add "-" for maximum range (worst case, we dont know if 2^31 is valid or not without the minus)
-									Integer.parseInt("-" + yytext());
-									return getToken(sym.INTEGER, yytext());  
+									Object result = (-1) * Integer.parseInt("-" + yytext());
+									return getToken(sym.INTEGER, result);  
 									
 							} catch (NumberFormatException e) {
 							
