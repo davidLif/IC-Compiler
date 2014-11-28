@@ -1,1 +1,0 @@
-C:\Users\shacharpooyae\Documents\Visual Studio 2013\Projects\GPSAppWindowsPhone\GPSAppWindowsPhone\GPSAppWindowsPhone.csproj;neutral
